@@ -1,24 +1,28 @@
-import express from "express";
-import { sql } from "drizzle-orm";
+import { createApp } from "./app.js";
 import { env } from "./config/env.js";
-import { db } from "./db/index.js";
+import { db, pool } from "./db/index.js";
 
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("Apartman yönetim sistemi çalışıyor");
+const app = createApp({
+  db,
+  secureCookie: env.NODE_ENV === "production",
+  trustProxy: env.TRUST_PROXY,
 });
 
-app.get("/health", async (req, res) => {
-  try {
-    await db.execute(sql`select 1`);
-    res.json({ status: "ok", database: "up" });
-  } catch (error) {
-    console.error("Veritabanına ulaşılamadı:", error);
-    res.status(503).json({ status: "error", database: "down" });
-  }
-});
-
-app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, () => {
   console.log(`Sunucu http://localhost:${env.PORT} adresinde çalışıyor`);
 });
+
+// Kapatılırken (Ctrl+C veya sunucu yeniden başlatılırken) yarım kalan istekleri
+// bitir, sonra veritabanı bağlantılarını düzgünce kapat.
+function shutdown(signal: string) {
+  console.log(`${signal} alındı, sunucu kapanıyor...`);
+  server.close(async () => {
+    await pool.end();
+    process.exit(0);
+  });
+  // İstekler 10 saniyede bitmezse zorla kapat.
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));

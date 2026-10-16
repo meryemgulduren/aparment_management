@@ -11,6 +11,11 @@ if (existsSync(envPath)) {
 const envSchema = z.object({
   DATABASE_URL: z.url(),
   PORT: z.coerce.number().int().positive().default(3000),
+  // "production" iken oturum çerezi yalnızca HTTPS üzerinden gönderilir.
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  // Sunucu Nginx gibi bir ters vekilin (reverse proxy) arkasındaysa "true" yapılır;
+  // yoksa giriş deneme sınırı herkesi vekilin IP'si sanır.
+  TRUST_PROXY: z.stringbool().default(false),
 });
 
 const parsed = envSchema.safeParse(process.env);

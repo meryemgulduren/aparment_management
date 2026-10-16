@@ -13,3 +13,5 @@ pool.on("error", (error) => {
 
 // casing ayarı drizzle.config.ts ile aynı olmalı, yoksa sütun adları tutmaz.
 export const db = drizzle({ client: pool, schema, casing: "snake_case" });
+
+export type Database = typeof db;
