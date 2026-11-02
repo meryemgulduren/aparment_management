@@ -14,6 +14,7 @@ import { ApartmentService } from "./modules/apartments/apartment.service.js";
 import { DrizzleAuthRepository } from "./modules/auth/auth.repository.js";
 import { createAuthRouter } from "./modules/auth/auth.routes.js";
 import { AuthService } from "./modules/auth/auth.service.js";
+import { DrizzleAttemptStore } from "./modules/auth/login-attempt.repository.js";
 import { LoginLimiter } from "./modules/auth/login-limiter.js";
 import { DrizzleChargeRepository } from "./modules/charges/charge.repository.js";
 import { createChargeRouter } from "./modules/charges/charge.routes.js";
@@ -101,7 +102,7 @@ export function createApp({ db, secureCookie, trustProxy }: AppOptions): Express
   });
 
   // Giriş gerektirmeyen tek API bölümü.
-  app.use("/api/auth", createAuthRouter(authService, new LoginLimiter(), { secureCookie }));
+  app.use("/api/auth", createAuthRouter(authService, new LoginLimiter(new DrizzleAttemptStore(db)), { secureCookie }));
 
   // Bu satırdan sonraki tüm /api adresleri oturum ister.
   app.use("/api", requireAuth(authService));

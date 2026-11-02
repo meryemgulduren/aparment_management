@@ -172,3 +172,12 @@ export const sessions = pgTable(
   },
   (t) => [index("sessions_user_idx").on(t.userId)],
 );
+
+// Hatalı giriş denemeleri (kaba kuvvet saldırısına karşı). Sunucusuz ortamda
+// bellek istekler arasında güvenilir paylaşılmadığı için veritabanında tutulur.
+export const loginAttempts = pgTable("login_attempts", {
+  // İstemci IP'sinin SHA-256 özeti; IP adresinin kendisi saklanmaz.
+  keyHash: text().primaryKey(),
+  failures: integer().notNull(),
+  resetAt: timestamp({ withTimezone: true }).notNull(),
+});

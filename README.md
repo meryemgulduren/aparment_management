@@ -1,4 +1,4 @@
-# Apartman Yönetimi
+# Acar Apartmanı: Yönetim Sistemi
 
 Apartman yöneticisinin telefondan kullandığı web uygulaması: daireler, sakinler, aidat
 borçları, tahsilatlar, giderler ve kasa.
@@ -11,8 +11,8 @@ docker-compose.yml        PostgreSQL veritabanı
 server/                   API (Node.js + Express + Drizzle ORM)
   drizzle/                Veritabanı migration dosyaları (otomatik üretilir)
   src/
-    index.ts              Sunucuyu başlatır
-    app.ts                Her şeyin birbirine bağlandığı yer
+    index.ts              Giriş noktası (Vercel için dışa aktarır, yerelde sunucuyu başlatır)
+    create-app.ts         Her şeyin birbirine bağlandığı yer
     config/env.ts         .env okuma ve doğrulama
     db/                   Veritabanı bağlantısı ve tablo tanımları (schema.ts)
     domain/ledger.ts      Borç/ödeme hesabı (saf iş mantığı)
@@ -63,6 +63,10 @@ cd web && npm run dev           # Arayüz: http://localhost:5173
 Aynı Wi-Fi'deki telefondan denemek için arayüzü `npm run dev -- --host` ile başlatıp
 telefonda `http://<bilgisayarın-IP'si>:5173` adresini açın.
 
+## Yayına alma
+
+Vercel + Neon üzerinde ücretsiz yayın adımları: [DEPLOY.md](DEPLOY.md).
+
 ## Tek sunucuda çalıştırma
 
 ```bash
@@ -79,6 +83,8 @@ Caddy) kullanıyorsanız `TRUST_PROXY=true` yapın.
 | Komut (server klasöründe) | Ne yapar |
 |---|---|
 | `npm run admin` | Yönetici oluşturur; kullanıcı varsa şifresini değiştirir |
+| `npm run admin:prod` | Aynısını canlı veritabanında yapar (`.env.production` gerekir) |
+| `npm run backup` / `backup:prod` | Tüm kayıtları `backups/` altına tarihli JSON olarak yazar |
 | `npm test` | Birim testleri |
 | `npm run typecheck` | Tip kontrolü |
 | `npm run db:generate` | `schema.ts` değişince yeni migration üretir |

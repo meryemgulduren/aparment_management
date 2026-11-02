@@ -1,6 +1,6 @@
 {
-  "name": "Apartman Yönetimi",
-  "short_name": "Apartman",
+  "name": "Acar Apartmanı",
+  "short_name": "Acar Apt.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f6f7fb",

@@ -5,6 +5,7 @@ import { Alert } from "../components/Feedback";
 import { Field } from "../components/Form";
 import { Icon } from "../components/Icon";
 import { useSubmit } from "../hooks/useAsync";
+import { BRAND } from "../lib/brand";
 
 export function LoginPage() {
   const { user, login } = useAuth();
@@ -30,10 +31,10 @@ export function LoginPage() {
       <section className="login-showcase" aria-hidden="true">
         <div className="login-brand">
           <span className="brand-mark"><Icon name="logo" /></span>
-          <span><strong>Apartman</strong><small>Yönetim sistemi</small></span>
+          <span><strong>{BRAND.name}</strong><small>{BRAND.tagline}</small></span>
         </div>
         <div className="login-message">
-          <span className="login-kicker">Apartman yönetimi</span>
+          <span className="login-kicker">{BRAND.name}</span>
           <h1>Aidattan kasaya, apartmanın tüm hesabı <em>tek yerde.</em></h1>
           <p>Kim ödedi, kimin borcu var, kasada ne kadar para kaldı; hepsi telefonunuzda.</p>
           <ul>
@@ -51,7 +52,7 @@ export function LoginPage() {
             <span className="brand-mark"><Icon name="logo" /></span>
           </div>
           <div className="login-heading">
-            <span className="eyebrow">Yönetici girişi</span>
+            <span className="eyebrow">{BRAND.name} · Yönetici girişi</span>
             <h2>Tekrar hoş geldiniz</h2>
             <p>Devam etmek için kullanıcı adınızı ve şifrenizi girin.</p>
           </div>

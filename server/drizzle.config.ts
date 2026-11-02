@@ -1,6 +1,11 @@
+import { existsSync } from "node:fs";
 import { defineConfig } from "drizzle-kit";
 
-process.loadEnvFile("../.env");
+// Yerelde ayarlar proje kökündeki .env'den gelir. Vercel'de bu dosya yoktur;
+// DATABASE_URL ortam değişkeni olarak verilir.
+if (existsSync("../.env")) {
+  process.loadEnvFile("../.env");
+}
 
 export default defineConfig({
   dialect: "postgresql",

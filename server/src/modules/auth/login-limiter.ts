@@ -1,68 +1,87 @@
+import { createHash } from "node:crypto";
 import { TooManyRequestsError } from "../../shared/errors.js";
 
-interface Attempts {
+export interface AttemptRecord {
   failures: number;
-  resetAt: number;
+  resetAt: Date;
+}
+
+/** Hatalı deneme sayaçlarının saklandığı yer (bellek veya veritabanı). */
+export interface AttemptStore {
+  /** Süresi dolmamış kaydı döner; yoksa null. */
+  get(keyHash: string, now: Date): Promise<AttemptRecord | null>;
+  /** Sayacı tek adımda bir artırır; süresi dolmuşsa yeni pencere başlatır. */
+  increment(keyHash: string, now: Date, windowMs: number): Promise<void>;
+  clear(keyHash: string): Promise<void>;
 }
 
 /**
  * Aynı IP'den art arda yanlış şifre denemesini sınırlar (kaba kuvvet saldırısına karşı).
- * Bilgiler bellekte tutulur: tek sunuculu küçük bir uygulama için yeterli,
- * sunucu yeniden başlayınca sıfırlanır.
+ * Sayaçların nerede tutulduğunu bilmez; bunu verilen AttemptStore belirler.
  */
 export class LoginLimiter {
-  private readonly attempts = new Map<string, Attempts>();
+  private readonly store: AttemptStore;
   private readonly maxFailures: number;
   private readonly windowMs: number;
-  private readonly now: () => number;
+  private readonly now: () => Date;
 
-  constructor(maxFailures = 10, windowMs = 15 * 60 * 1000, now: () => number = Date.now) {
+  constructor(
+    store: AttemptStore,
+    maxFailures = 10,
+    windowMs = 15 * 60 * 1000,
+    now: () => Date = () => new Date(),
+  ) {
+    this.store = store;
     this.maxFailures = maxFailures;
     this.windowMs = windowMs;
     this.now = now;
   }
 
   /** Sınır aşıldıysa TooManyRequestsError fırlatır. */
-  assertAllowed(key: string): void {
-    const entry = this.current(key);
-    if (entry && entry.failures >= this.maxFailures) {
-      const minutes = Math.ceil((entry.resetAt - this.now()) / 60_000);
+  async assertAllowed(clientKey: string): Promise<void> {
+    const now = this.now();
+    const record = await this.store.get(hashKey(clientKey), now);
+    if (record && record.failures >= this.maxFailures) {
+      const minutes = Math.max(1, Math.ceil((record.resetAt.getTime() - now.getTime()) / 60_000));
       throw new TooManyRequestsError(
         `Çok fazla hatalı deneme. ${minutes} dakika sonra tekrar deneyin.`,
       );
     }
   }
 
-  recordFailure(key: string): void {
-    const entry = this.current(key) ?? { failures: 0, resetAt: this.now() + this.windowMs };
-    entry.failures += 1;
-    this.attempts.set(key, entry);
-    this.prune();
+  recordFailure(clientKey: string): Promise<void> {
+    return this.store.increment(hashKey(clientKey), this.now(), this.windowMs);
   }
 
-  reset(key: string): void {
-    this.attempts.delete(key);
+  reset(clientKey: string): Promise<void> {
+    return this.store.clear(hashKey(clientKey));
+  }
+}
+
+// IP adresi kişisel veridir; depoya yalnızca özeti yazılır.
+function hashKey(clientKey: string): string {
+  return createHash("sha256").update(`login:${clientKey}`).digest("hex");
+}
+
+/** Testler ve tek sunuculu kurulumlar için bellekte çalışan depo. */
+export class MemoryAttemptStore implements AttemptStore {
+  private readonly records = new Map<string, AttemptRecord>();
+
+  async get(keyHash: string, now: Date): Promise<AttemptRecord | null> {
+    const record = this.records.get(keyHash);
+    if (!record || record.resetAt <= now) return null;
+    return { ...record };
   }
 
-  private current(key: string): Attempts | undefined {
-    const entry = this.attempts.get(key);
-    if (entry && entry.resetAt <= this.now()) {
-      this.attempts.delete(key);
-      return undefined;
-    }
-    return entry;
+  async increment(keyHash: string, now: Date, windowMs: number): Promise<void> {
+    const current = await this.get(keyHash, now);
+    this.records.set(keyHash, {
+      failures: (current?.failures ?? 0) + 1,
+      resetAt: current?.resetAt ?? new Date(now.getTime() + windowMs),
+    });
   }
 
-  // Süresi dolan kayıtları atar; bellek sınırsız büyümesin.
-  private prune(): void {
-    if (this.attempts.size < 1000) {
-      return;
-    }
-    const now = this.now();
-    for (const [key, entry] of this.attempts) {
-      if (entry.resetAt <= now) {
-        this.attempts.delete(key);
-      }
-    }
+  async clear(keyHash: string): Promise<void> {
+    this.records.delete(keyHash);
   }
 }

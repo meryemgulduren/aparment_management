@@ -27,17 +27,17 @@ export function createAuthRouter(
 
   router.post("/login", async (req, res) => {
     const clientKey = req.ip ?? "unknown";
-    limiter.assertAllowed(clientKey);
+    await limiter.assertAllowed(clientKey);
     const { username, password } = parseInput(loginSchema, req.body);
 
     try {
       const result = await authService.login(username, password);
-      limiter.reset(clientKey);
+      await limiter.reset(clientKey);
       res.cookie(SESSION_COOKIE, result.token, { ...cookieOptions, expires: result.expiresAt });
       res.json({ user: result.user });
     } catch (error) {
       if (error instanceof UnauthorizedError) {
-        limiter.recordFailure(clientKey);
+        await limiter.recordFailure(clientKey);
       }
       throw error;
     }

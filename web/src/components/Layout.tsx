@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { useAuth } from "../auth/AuthContext";
+import { BRAND } from "../lib/brand";
 import { Icon, type IconName } from "./Icon";
 
 interface NavItem {
@@ -41,11 +42,11 @@ function pageTitle(pathname: string) {
 
 export function Brand() {
   return (
-    <Link to="/" className="brand" aria-label="Apartman Yönetimi ana sayfa">
+    <Link to="/" className="brand" aria-label={`${BRAND.name} ana sayfa`}>
       <span className="brand-mark"><Icon name="logo" /></span>
       <span className="brand-copy">
-        <strong>Apartman</strong>
-        <small>Yönetim sistemi</small>
+        <strong>{BRAND.name}</strong>
+        <small>{BRAND.tagline}</small>
       </span>
     </Link>
   );
@@ -100,7 +101,7 @@ export function Layout() {
         <header className="app-header">
           <div className="mobile-brand"><Brand /></div>
           <div className="desktop-page-context">
-            <span>Apartman yönetimi</span>
+            <span>{BRAND.name}</span>
             <strong>{pageTitle(location.pathname)}</strong>
           </div>
           <div className="header-user">
