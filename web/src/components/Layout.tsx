@@ -1,51 +1,134 @@
-import { Link, NavLink, Outlet } from "react-router";
+import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { useAuth } from "../auth/AuthContext";
+import { Icon, type IconName } from "./Icon";
 
-// Basit çizgi ikonlar (ek paket gerektirmesin diye satır içi).
-const icons = {
-  home: "M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
-  building: "M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17M3 21h18M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2",
-  calendar: "M4 6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8 3v4M16 3v4M8 14l2 2 4-4",
-  wallet: "M3 7a2 2 0 0 1 2-2h13v4M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2zM16 14h1",
-  receipt: "M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3",
-};
+interface NavItem {
+  to: string;
+  label: string;
+  icon: IconName;
+  end?: boolean;
+}
 
-function Icon({ path }: { path: string }) {
+// Telefonda alt menü: en sık kullanılan beş ekran.
+const mobileNav: NavItem[] = [
+  { to: "/", label: "Özet", icon: "home", end: true },
+  { to: "/daireler", label: "Daireler", icon: "building" },
+  { to: "/aidat", label: "Aidat", icon: "calendar" },
+  { to: "/tahsilat", label: "Tahsilat", icon: "wallet" },
+  { to: "/giderler", label: "Giderler", icon: "receipt" },
+];
+
+const generalNav: NavItem[] = [
+  { to: "/", label: "Genel bakış", icon: "home", end: true },
+  { to: "/daireler", label: "Daireler", icon: "building" },
+  { to: "/aidat", label: "Aidat takibi", icon: "calendar" },
+];
+
+const financeNav: NavItem[] = [
+  { to: "/tahsilat", label: "Tahsilatlar", icon: "wallet" },
+  { to: "/giderler", label: "Giderler", icon: "receipt" },
+  { to: "/kasa", label: "Kasa", icon: "vault" },
+];
+
+function pageTitle(pathname: string) {
+  if (pathname.startsWith("/daireler")) return "Daireler ve sakinler";
+  if (pathname.startsWith("/aidat")) return "Aidat yönetimi";
+  if (pathname.startsWith("/tahsilat")) return "Tahsilatlar";
+  if (pathname.startsWith("/giderler")) return "Giderler";
+  if (pathname.startsWith("/kasa")) return "Kasa";
+  return "Yönetim özeti";
+}
+
+export function Brand() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={path} />
-    </svg>
+    <Link to="/" className="brand" aria-label="Apartman Yönetimi ana sayfa">
+      <span className="brand-mark"><Icon name="logo" /></span>
+      <span className="brand-copy">
+        <strong>Apartman</strong>
+        <small>Yönetim sistemi</small>
+      </span>
+    </Link>
   );
 }
 
-const navItems = [
-  { to: "/", label: "Özet", icon: icons.home, end: true },
-  { to: "/daireler", label: "Daireler", icon: icons.building },
-  { to: "/aidat", label: "Aidat", icon: icons.calendar },
-  { to: "/tahsilat", label: "Tahsilat", icon: icons.wallet },
-  { to: "/giderler", label: "Giderler", icon: icons.receipt },
-];
+function SideLink({ to, label, icon, end }: NavItem) {
+  return (
+    <NavLink to={to} end={end} className="side-link">
+      <span className="side-link-icon"><Icon name={icon} /></span>
+      <span>{label}</span>
+    </NavLink>
+  );
+}
 
 export function Layout() {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const initial = user?.username.trim().charAt(0).toLocaleUpperCase("tr") || "Y";
 
   return (
-    <>
-      <header className="app-header">
-        <Link to="/" className="brand">Apartman Yönetimi</Link>
-        <button type="button" onClick={() => logout()}>Çıkış</button>
-      </header>
-      <main>
-        <Outlet />
-      </main>
+    <div className="app-shell">
+      <aside className="sidebar">
+        <Brand />
+
+        <nav className="side-navigation" aria-label="Yönetim menüsü">
+          <p className="nav-section-label">Genel</p>
+          {generalNav.map((item) => <SideLink key={item.to} {...item} />)}
+          <p className="nav-section-label">Finans</p>
+          {financeNav.map((item) => <SideLink key={item.to} {...item} />)}
+        </nav>
+
+        <div className="sidebar-quick-card">
+          <span className="sidebar-quick-icon"><Icon name="plus" /></span>
+          <strong>Ödeme mi geldi?</strong>
+          <span>Tahsilatı kaydedin, borç ve kasa anında güncellensin.</span>
+          <Link to="/tahsilat/yeni">Ödeme al</Link>
+        </div>
+
+        <div className="sidebar-user">
+          <span className="user-avatar">{initial}</span>
+          <span className="sidebar-user-copy">
+            <strong>{user?.username}</strong>
+            <small>Yönetici hesabı</small>
+          </span>
+          <button type="button" onClick={() => logout()} aria-label="Çıkış yap" title="Çıkış yap">
+            <Icon name="logout" />
+          </button>
+        </div>
+      </aside>
+
+      <div className="app-stage">
+        <header className="app-header">
+          <div className="mobile-brand"><Brand /></div>
+          <div className="desktop-page-context">
+            <span>Apartman yönetimi</span>
+            <strong>{pageTitle(location.pathname)}</strong>
+          </div>
+          <div className="header-user">
+            <span className="header-user-copy">
+              <strong>{user?.username}</strong>
+              <small>Yönetici</small>
+            </span>
+            <span className="user-avatar">{initial}</span>
+            <button type="button" className="header-action" onClick={() => logout()} aria-label="Çıkış yap">
+              <Icon name="logout" />
+              <span>Çıkış</span>
+            </button>
+          </div>
+        </header>
+
+        <main className="app-content">
+          <Outlet />
+        </main>
+      </div>
+
       <nav className="bottom-nav" aria-label="Ana menü">
-        {navItems.map((item) => (
+        {mobileNav.map((item) => (
           <NavLink key={item.to} to={item.to} end={item.end}>
-            <Icon path={item.icon} />
+            <span className="nav-icon"><Icon name={item.icon} /></span>
             {item.label}
           </NavLink>
         ))}
       </nav>
-    </>
+    </div>
   );
 }

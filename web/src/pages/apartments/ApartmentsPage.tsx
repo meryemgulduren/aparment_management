@@ -4,6 +4,7 @@ import { apartmentApi } from "../../api/endpoints";
 import type { ApartmentListItem } from "../../api/types";
 import { Balance } from "../../components/Display";
 import { EmptyState, ErrorState, Loading } from "../../components/Feedback";
+import { Icon } from "../../components/Icon";
 import { PageHeader } from "../../components/PageHeader";
 import { useAsync } from "../../hooks/useAsync";
 
@@ -19,24 +20,27 @@ export function ApartmentsPage() {
   const { data, error, loading, reload } = useAsync(() => apartmentApi.list(), []);
   const [search, setSearch] = useState("");
 
-  const action = (
-    <Link to="/daireler/yeni" className="btn small">+ Daire</Link>
-  );
-
   if (error) return <ErrorState error={error} onRetry={reload} />;
 
   const apartments = (data ?? []).filter((apartment) => matches(apartment, search));
+  const people = (data ?? []).reduce((total, apartment) => total + apartment.householdSize, 0);
 
   return (
-    <div className="stack">
-      <PageHeader title="Daireler" action={action} />
+    <div className="stack-lg">
+      <PageHeader
+        eyebrow={data ? `${data.length} daire · ${people} kişi` : "Daireler"}
+        title="Daireler"
+        description="Kapı numarasına dokunarak sakinleri, borçları ve ödemeleri görün."
+        actions={<Link to="/daireler/yeni" className="btn"><Icon name="plus" /> Daire ekle</Link>}
+      />
       {data && data.length > 5 && (
         <input
+          id="apartment-search"
           type="search"
-          placeholder="Kapı no veya isim ara"
+          placeholder="Kapı numarası veya isimle ara"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          aria-label="Ara"
+          aria-label="Daire ara"
         />
       )}
       {loading && !data ? (
@@ -44,13 +48,12 @@ export function ApartmentsPage() {
       ) : data?.length === 0 ? (
         <EmptyState>
           Henüz daire eklenmemiş.
-          <br />
-          <Link to="/daireler/yeni" className="btn">İlk daireyi ekle</Link>
+          <Link to="/daireler/yeni" className="btn"><Icon name="plus" /> İlk daireyi ekle</Link>
         </EmptyState>
       ) : apartments.length === 0 ? (
         <EmptyState>Aramaya uyan daire yok.</EmptyState>
       ) : (
-        <ul className="list">
+        <ul className="list tiles">
           {apartments.map((apartment) => (
             <li key={apartment.id}>
               <Link to={`/daireler/${apartment.id}`} className="list-item">
@@ -61,7 +64,7 @@ export function ApartmentsPage() {
                   </span>
                   <br />
                   <span className="sub">
-                    {apartment.floor !== null ? `${apartment.floor}. kat · ` : ""}
+                    {apartment.floor !== null ? `${apartment.floor === 0 ? "Zemin" : `${apartment.floor}.`} kat · ` : ""}
                     {apartment.householdSize} kişi
                   </span>
                 </span>

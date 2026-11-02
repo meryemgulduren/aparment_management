@@ -1,24 +1,35 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
+import { Icon } from "./Icon";
 
 interface PageHeaderProps {
   title: string;
-  /** Verilirse solda geri oku çıkar. */
+  /** Başlığın üstündeki küçük etiket (ör. "Kasım 2026"). */
+  eyebrow?: string;
+  /** Başlığın altındaki kısa açıklama. */
+  description?: ReactNode;
+  /** Verilirse solda geri düğmesi çıkar. */
   backTo?: string;
-  /** Sağdaki düğme (ör. "+ Ekle"). */
-  action?: ReactNode;
+  /** Sağdaki düğmeler. */
+  actions?: ReactNode;
 }
 
-export function PageHeader({ title, backTo, action }: PageHeaderProps) {
+export function PageHeader({ title, eyebrow, description, backTo, actions }: PageHeaderProps) {
   return (
     <div className="page-header">
-      {backTo && (
-        <Link to={backTo} className="back-link" aria-label="Geri">
-          ‹
-        </Link>
-      )}
-      <h1>{title}</h1>
-      {action}
+      <div className="page-header-main">
+        {backTo && (
+          <Link to={backTo} className="back-link" aria-label="Geri">
+            <Icon name="chevronLeft" />
+          </Link>
+        )}
+        <div className="page-header-copy">
+          {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+          <h1>{title}</h1>
+          {description && <p>{description}</p>}
+        </div>
+      </div>
+      {actions && <div className="page-header-actions">{actions}</div>}
     </div>
   );
 }

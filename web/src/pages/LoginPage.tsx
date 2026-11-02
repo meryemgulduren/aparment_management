@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../auth/AuthContext";
 import { Alert } from "../components/Feedback";
 import { Field } from "../components/Form";
+import { Icon } from "../components/Icon";
 import { useSubmit } from "../hooks/useAsync";
 
 export function LoginPage() {
@@ -26,33 +27,64 @@ export function LoginPage() {
 
   return (
     <div className="login-page">
-      <form className="card login-card stack" onSubmit={handleSubmit}>
-        <img className="logo" src="/icon.svg" alt="" />
-        <h1>Apartman Yönetimi</h1>
-        {error && <Alert kind="error">{error.message}</Alert>}
-        <Field label="Kullanıcı adı">
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
-            autoCapitalize="none"
-            autoCorrect="off"
-            required
-          />
-        </Field>
-        <Field label="Şifre">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-          />
-        </Field>
-        <button className="btn block" disabled={submitting}>
-          {submitting ? "Giriş yapılıyor…" : "Giriş yap"}
-        </button>
-      </form>
+      <section className="login-showcase" aria-hidden="true">
+        <div className="login-brand">
+          <span className="brand-mark"><Icon name="logo" /></span>
+          <span><strong>Apartman</strong><small>Yönetim sistemi</small></span>
+        </div>
+        <div className="login-message">
+          <span className="login-kicker">Apartman yönetimi</span>
+          <h1>Aidattan kasaya, apartmanın tüm hesabı <em>tek yerde.</em></h1>
+          <p>Kim ödedi, kimin borcu var, kasada ne kadar para kaldı; hepsi telefonunuzda.</p>
+          <ul>
+            <li><span><Icon name="check" /></span> Her ayın aidatını tek dokunuşla yazın</li>
+            <li><span><Icon name="check" /></span> Borçlu daireleri anında görün</li>
+            <li><span><Icon name="check" /></span> Gelir ve giderleri şeffafça izleyin</li>
+          </ul>
+        </div>
+        <div className="login-security"><Icon name="shield" /> Bilgilere yalnızca yönetici hesabıyla erişilebilir.</div>
+      </section>
+
+      <section className="login-form-wrap">
+        <form className="login-card stack" onSubmit={handleSubmit}>
+          <div className="login-mobile-logo">
+            <span className="brand-mark"><Icon name="logo" /></span>
+          </div>
+          <div className="login-heading">
+            <span className="eyebrow">Yönetici girişi</span>
+            <h2>Tekrar hoş geldiniz</h2>
+            <p>Devam etmek için kullanıcı adınızı ve şifrenizi girin.</p>
+          </div>
+          {error && <Alert kind="error">{error.message}</Alert>}
+          <Field label="Kullanıcı adı">
+            <input
+              id="login-username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              required
+              autoFocus
+            />
+          </Field>
+          <Field label="Şifre">
+            <input
+              id="login-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </Field>
+          <button className="btn block login-submit" disabled={submitting}>
+            {submitting ? "Giriş yapılıyor…" : "Giriş yap"}
+            {!submitting && <Icon name="arrow" />}
+          </button>
+          <p className="login-help">Şifrenizi unuttuysanız sistemi kuran kişiden yenilemesini isteyin.</p>
+        </form>
+      </section>
     </div>
   );
 }

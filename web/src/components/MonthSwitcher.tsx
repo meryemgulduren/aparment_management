@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router";
 import { formatPeriod, periodOrCurrent, shiftPeriod } from "../lib/dates";
+import { Icon } from "./Icon";
 
 /**
  * Seçili ay adres çubuğunda (?ay=2026-10) tutulur. Böylece bir kayda girip geri
@@ -15,11 +16,11 @@ export function MonthSwitcher({ period, onChange }: { period: string; onChange(p
   return (
     <div className="month-switcher">
       <button type="button" aria-label="Önceki ay" onClick={() => onChange(shiftPeriod(period, -1))}>
-        ‹
+        <Icon name="chevronLeft" />
       </button>
-      <span className="label">{formatPeriod(period)}</span>
+      <span className="label" aria-live="polite">{formatPeriod(period)}</span>
       <button type="button" aria-label="Sonraki ay" onClick={() => onChange(shiftPeriod(period, 1))}>
-        ›
+        <Icon name="chevron" />
       </button>
     </div>
   );

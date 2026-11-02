@@ -27,8 +27,8 @@ export function BulkChargePage() {
   // Sonuç gösterildikten sonra form kapanır; ek ödemenin yanlışlıkla iki kez yazılmasını önler.
   if (result) {
     return (
-      <div className="stack">
-        <PageHeader title="Borç yazıldı" backTo={`/aidat?ay=${result.period}`} />
+      <div className="stack-lg form-page">
+        <PageHeader eyebrow={formatPeriod(result.period)} title="Borç yazıldı" backTo={`/aidat?ay=${result.period}`} />
         <Alert kind="success">
           {result.created} daireye borç yazıldı.
           {result.skipped > 0 && ` ${result.skipped} dairede bu ayın aidatı zaten vardı, atlandı.`}
@@ -41,8 +41,13 @@ export function BulkChargePage() {
   }
 
   return (
-    <div className="stack">
-      <PageHeader title="Tüm dairelere borç yaz" backTo={`/aidat?ay=${initialPeriod}`} />
+    <div className="stack-lg form-page">
+      <PageHeader
+        eyebrow="Aidat"
+        title="Tüm dairelere borç yaz"
+        description="Her ayın aidatını veya herkesi ilgilendiren ek ödemeyi tek seferde yazın."
+        backTo={`/aidat?ay=${initialPeriod}`}
+      />
       <Alert kind="info">
         Aynı ayın aidatı ikinci kez yazılmaz; daha önce yazılan daireler atlanır. Sonradan eklenen
         daireye aidat yazmak için de bu sayfayı kullanabilirsiniz.

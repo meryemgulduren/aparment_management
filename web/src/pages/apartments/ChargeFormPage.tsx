@@ -21,8 +21,13 @@ export function ChargeFormPage() {
   const backTo = `/daireler/${apartmentId}`;
 
   return (
-    <div className="stack">
-      <PageHeader title={`Daire ${apartment.label} · borç ekle`} backTo={backTo} />
+    <div className="stack-lg form-page">
+      <PageHeader
+        eyebrow={`Daire ${apartment.label}`}
+        title="Borç ekle"
+        description="Yalnızca bu daireye borç yazar. Tüm dairelere aidat için Aidat sayfasını kullanın."
+        backTo={backTo}
+      />
       <ChargeForm
         suggestedAmountKurus={lastDues.amountKurus}
         submitLabel="Borcu yaz"

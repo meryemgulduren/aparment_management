@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { apartmentApi, residentApi } from "../../api/endpoints";
 import type { ResidentKind } from "../../api/types";
 import { Alert, ErrorState, Loading } from "../../components/Feedback";
 import { Field, Segmented } from "../../components/Form";
+import { Icon } from "../../components/Icon";
 import { PageHeader } from "../../components/PageHeader";
 import { toApiError, useAsync, useSubmit } from "../../hooks/useAsync";
 import { residentKindLabels } from "../../lib/labels";
@@ -71,40 +72,45 @@ export function ResidentFormPage() {
   const label = apartment.data?.label ?? "";
 
   return (
-    <div className="stack">
-      <PageHeader title={residentId ? "Sakin bilgileri" : `Daire ${label} · yeni sakin`} backTo={backTo} />
+    <div className="stack-lg form-page">
+      <PageHeader
+        eyebrow={`Daire ${label}`}
+        title={residentId ? "Sakin bilgileri" : "Yeni sakin"}
+        backTo={backTo}
+      />
       <form className="card stack" onSubmit={handleSubmit}>
         {error && <Alert kind="error">{error.message}</Alert>}
         <Field label="Ad soyad" error={fields.fullName}>
-          <input value={fullName} onChange={(e) => setFullName(e.target.value)} required minLength={2} maxLength={100} autoComplete="off" />
+          <input id="resident-name" value={fullName} onChange={(e) => setFullName(e.target.value)} required minLength={2} maxLength={100} autoComplete="off" />
         </Field>
         <Segmented label="Durumu" value={kind} options={kindOptions} onChange={setKind} />
         <Field label="Telefon" error={fields.phone}>
-          <input type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} placeholder="0532 123 45 67" autoComplete="off" />
+          <input id="resident-phone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} placeholder="0532 123 45 67" autoComplete="off" />
         </Field>
         <Field label="Not" error={fields.note}>
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} />
+          <textarea id="resident-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="İsteğe bağlı" />
         </Field>
         {residentId && (
           <label className="checkbox">
-            <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
+            <input id="resident-active" type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
             Hâlâ bu dairede oturuyor
           </label>
         )}
-        <button className="btn block" disabled={submitting}>
-          {submitting ? "Kaydediliyor…" : "Kaydet"}
-        </button>
+        <div className="form-actions">
+          <Link to={backTo} className="btn secondary">Vazgeç</Link>
+          <button className="btn" disabled={submitting}>{submitting ? "Kaydediliyor…" : "Kaydet"}</button>
+        </div>
       </form>
       {residentId && (
-        <>
+        <section className="stack">
           <p className="note">
             Taşınan kişiyi silmek yerine "Hâlâ bu dairede oturuyor" işaretini kaldırın; geçmiş kaybolmaz.
             Silme yalnızca yanlış girilen kayıtlar içindir.
           </p>
           <button type="button" className="btn danger block" onClick={handleDelete}>
-            Kaydı sil
+            <Icon name="trash" /> Kaydı sil
           </button>
-        </>
+        </section>
       )}
     </div>
   );

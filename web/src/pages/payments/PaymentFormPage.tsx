@@ -70,12 +70,17 @@ export function PaymentFormPage() {
   const fields = error?.fields ?? {};
 
   return (
-    <div className="stack">
-      <PageHeader title="Ödeme al" backTo={returnTo} />
+    <div className="stack-lg form-page">
+      <PageHeader
+        eyebrow="Tahsilat"
+        title="Ödeme al"
+        description="Ödeme en eski borçtan başlayarak düşülür; hangi ayın kapandığını sistem kendisi bulur."
+        backTo={returnTo}
+      />
       <form className="card stack" onSubmit={handleSubmit}>
         {error && <Alert kind="error">{error.message}</Alert>}
         <Field label="Daire" error={fields.apartmentId}>
-          <select value={apartmentId} onChange={(e) => setApartmentId(e.target.value)} required>
+          <select id="payment-apartment" value={apartmentId} onChange={(e) => setApartmentId(e.target.value)} required>
             <option value="" disabled>Daire seçin</option>
             {apartments.data.map((apartment) => (
               <option key={apartment.id} value={apartment.id}>
@@ -87,29 +92,34 @@ export function PaymentFormPage() {
           </select>
         </Field>
         {selected && (
-          <div className="row between small">
-            <span className="muted">Güncel bakiye</span>
+          <div className="summary-chip row between">
+            <span>Daire {selected.label} güncel bakiye</span>
             <Balance kurus={selected.balanceKurus} />
           </div>
         )}
-        <Field label="Tutar (TL)" error={amountError ?? fields.amountKurus}>
-          <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="1250" required autoComplete="off" />
-        </Field>
-        {selected && selected.balanceKurus > 0 && (
-          <button type="button" className="btn small secondary" onClick={() => setAmount(kurusToInput(selected.balanceKurus))}>
-            Borcun tamamı
-          </button>
-        )}
+        <div className="form-grid cols-2">
+          <div className="field-group">
+            <Field label="Tutar (TL)" error={amountError ?? fields.amountKurus}>
+              <input id="payment-amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="1250" required autoComplete="off" />
+            </Field>
+            {selected && selected.balanceKurus > 0 && (
+              <button type="button" className="btn small secondary" onClick={() => setAmount(kurusToInput(selected.balanceKurus))}>
+                Borcun tamamını yaz
+              </button>
+            )}
+          </div>
+          <Field label="Ödeme tarihi" error={fields.paidAt}>
+            <input id="payment-date" type="date" value={paidAt} max={todayIso()} onChange={(e) => setPaidAt(e.target.value)} required />
+          </Field>
+        </div>
         <Segmented label="Ödeme şekli" value={method} options={methodOptions} onChange={setMethod} />
-        <Field label="Ödeme tarihi" error={fields.paidAt}>
-          <input type="date" value={paidAt} max={todayIso()} onChange={(e) => setPaidAt(e.target.value)} required />
-        </Field>
         <Field label="Not" error={fields.note}>
-          <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="İsteğe bağlı" />
+          <input id="payment-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="İsteğe bağlı" />
         </Field>
-        <button className="btn block" disabled={submitting}>
-          {submitting ? "Kaydediliyor…" : "Ödemeyi kaydet"}
-        </button>
+        <div className="form-actions">
+          <Link to={returnTo} className="btn secondary">Vazgeç</Link>
+          <button className="btn" disabled={submitting}>{submitting ? "Kaydediliyor…" : "Ödemeyi kaydet"}</button>
+        </div>
       </form>
     </div>
   );

@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { expenseApi } from "../../api/endpoints";
 import { Money } from "../../components/Display";
 import { Alert, EmptyState, ErrorState, Loading } from "../../components/Feedback";
+import { Icon } from "../../components/Icon";
 import { MonthSwitcher, usePeriodParam } from "../../components/MonthSwitcher";
 import { PageHeader } from "../../components/PageHeader";
 import { toApiError, useAsync } from "../../hooks/useAsync";
@@ -29,9 +30,20 @@ export function ExpensesPage() {
   const total = data?.reduce((sum, expense) => sum + expense.amountKurus, 0) ?? 0;
 
   return (
-    <div className="stack">
-      <PageHeader title="Giderler" action={<Link to="/giderler/yeni" className="btn small">+ Gider</Link>} />
-      <MonthSwitcher period={period} onChange={setPeriod} />
+    <div className="stack-lg">
+      <PageHeader
+        eyebrow="Finans"
+        title="Giderler"
+        description="Elektrik, temizlik, asansör bakımı gibi apartman harcamaları."
+        actions={<Link to="/giderler/yeni" className="btn"><Icon name="plus" /> Gider ekle</Link>}
+      />
+
+      <div className="toolbar">
+        <MonthSwitcher period={period} onChange={setPeriod} />
+        {data && data.length > 0 && (
+          <div className="summary-chip"><span>{data.length} gider</span><Money kurus={total} /></div>
+        )}
+      </div>
       {actionError && <Alert kind="error">{actionError}</Alert>}
 
       {error ? (
@@ -41,35 +53,30 @@ export function ExpensesPage() {
       ) : data.length === 0 ? (
         <EmptyState>{formatPeriod(period)} ayında gider yok.</EmptyState>
       ) : (
-        <>
-          <div className="card row between">
-            <span className="muted">{data.length} gider</span>
-            <Money kurus={total} />
-          </div>
-          <ul className="list">
-            {data.map((expense) => (
-              <li key={expense.id} className="list-item">
-                <span className="grow">
-                  <span className="title">{expenseCategoryLabels[expense.category]}</span>
-                  <br />
-                  <span className="sub">
-                    {formatDate(expense.spentAt)}
-                    {expense.description ? ` · ${expense.description}` : ""}
-                  </span>
+        <ul className="list">
+          {data.map((expense) => (
+            <li key={expense.id} className="list-item">
+              <span className="grow">
+                <span className="title">{expenseCategoryLabels[expense.category]}</span>
+                <br />
+                <span className="sub">
+                  {formatDate(expense.spentAt)}
+                  {expense.description ? ` · ${expense.description}` : ""}
                 </span>
-                <Money kurus={expense.amountKurus} />
-                <button
-                  type="button"
-                  className="icon-btn"
-                  aria-label="Gideri sil"
-                  onClick={() => handleDelete(expense.id, expense.amountKurus)}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+              </span>
+              <Money kurus={expense.amountKurus} />
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="Gideri sil"
+                title="Gideri sil"
+                onClick={() => handleDelete(expense.id, expense.amountKurus)}
+              >
+                <Icon name="trash" />
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

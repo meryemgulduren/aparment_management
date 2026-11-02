@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { ApiError } from "../api/client";
 
 export function Loading() {
-  return <div className="state" role="status">Yükleniyor…</div>;
+  return <div className="state loading" role="status">Yükleniyor…</div>;
 }
 
 export function ErrorState({ error, onRetry }: { error: ApiError; onRetry?: () => void }) {

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { apartmentApi } from "../../api/endpoints";
 import { Alert, ErrorState, Loading } from "../../components/Feedback";
 import { Field } from "../../components/Form";
@@ -53,30 +53,35 @@ export function ApartmentFormPage() {
   }
 
   const fields = error?.fields ?? {};
+  const backTo = apartmentId ? `/daireler/${apartmentId}` : "/daireler";
 
   return (
-    <div className="stack">
+    <div className="stack-lg form-page">
       <PageHeader
-        title={apartmentId ? `Daire ${existing.data?.label ?? ""} düzenle` : "Yeni daire"}
-        backTo={apartmentId ? `/daireler/${apartmentId}` : "/daireler"}
+        eyebrow={apartmentId ? `Daire ${existing.data?.label ?? ""}` : "Daireler"}
+        title={apartmentId ? "Daire bilgilerini düzenle" : "Yeni daire"}
+        backTo={backTo}
       />
       <form className="card stack" onSubmit={handleSubmit}>
         {error && <Alert kind="error">{error.message}</Alert>}
-        <Field label="Kapı numarası" error={fields.label} hint='Örnek: 5, 12, 3A'>
-          <input value={label} onChange={(e) => setLabel(e.target.value)} required maxLength={20} autoFocus={!apartmentId} />
+        <Field label="Kapı numarası" error={fields.label} hint="Örnek: 5, 12, 3A">
+          <input id="apartment-label" value={label} onChange={(e) => setLabel(e.target.value)} required maxLength={20} autoFocus={!apartmentId} />
         </Field>
-        <Field label="Kat" error={fields.floor} hint="Zemin kat için 0, bodrum için -1">
-          <input type="number" inputMode="numeric" value={floor} onChange={(e) => setFloor(e.target.value)} min={-5} max={100} />
-        </Field>
-        <Field label="Oturan kişi sayısı" error={fields.householdSize} hint="Boş daire için 0">
-          <input type="number" inputMode="numeric" value={householdSize} onChange={(e) => setHouseholdSize(e.target.value)} min={0} max={50} required />
-        </Field>
+        <div className="form-grid cols-2">
+          <Field label="Kat" error={fields.floor} hint="Zemin kat 0, bodrum -1">
+            <input id="apartment-floor" type="number" inputMode="numeric" value={floor} onChange={(e) => setFloor(e.target.value)} min={-5} max={100} />
+          </Field>
+          <Field label="Oturan kişi sayısı" error={fields.householdSize} hint="Boş daire için 0">
+            <input id="apartment-household" type="number" inputMode="numeric" value={householdSize} onChange={(e) => setHouseholdSize(e.target.value)} min={0} max={50} required />
+          </Field>
+        </div>
         <Field label="Not" error={fields.note}>
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} />
+          <textarea id="apartment-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="İsteğe bağlı" />
         </Field>
-        <button className="btn block" disabled={submitting}>
-          {submitting ? "Kaydediliyor…" : "Kaydet"}
-        </button>
+        <div className="form-actions">
+          <Link to={backTo} className="btn secondary">Vazgeç</Link>
+          <button className="btn" disabled={submitting}>{submitting ? "Kaydediliyor…" : "Kaydet"}</button>
+        </div>
       </form>
     </div>
   );

@@ -73,15 +73,17 @@ export function ChargeForm({
       </div>
       {kind === "extra" && (
         <Field label="Açıklama" error={fields.description} hint="Örnek: Asansör tamiri, çatı onarımı">
-          <input value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} required />
+          <input id="charge-description" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} required />
         </Field>
       )}
-      <Field label="Tutar (TL)" error={amountError ?? fields.amountKurus}>
-        <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="1250" required autoComplete="off" />
-      </Field>
-      <Field label="Son ödeme tarihi" error={fields.dueDate}>
-        <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
-      </Field>
+      <div className="form-grid cols-2">
+        <Field label="Tutar (TL)" error={amountError ?? fields.amountKurus}>
+          <input id="charge-amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="1250" required autoComplete="off" />
+        </Field>
+        <Field label="Son ödeme tarihi" error={fields.dueDate}>
+          <input id="charge-due-date" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
+        </Field>
+      </div>
       <button className="btn block" disabled={submitting}>
         {submitting ? "Kaydediliyor…" : submitLabel}
       </button>

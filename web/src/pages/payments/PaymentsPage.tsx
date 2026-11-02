@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { paymentApi } from "../../api/endpoints";
 import { Money } from "../../components/Display";
 import { Alert, EmptyState, ErrorState, Loading } from "../../components/Feedback";
+import { Icon } from "../../components/Icon";
 import { MonthSwitcher, usePeriodParam } from "../../components/MonthSwitcher";
 import { PageHeader } from "../../components/PageHeader";
 import { toApiError, useAsync } from "../../hooks/useAsync";
@@ -29,9 +30,20 @@ export function PaymentsPage() {
   const total = data?.reduce((sum, payment) => sum + payment.amountKurus, 0) ?? 0;
 
   return (
-    <div className="stack">
-      <PageHeader title="Tahsilat" action={<Link to="/tahsilat/yeni" className="btn small">+ Ödeme</Link>} />
-      <MonthSwitcher period={period} onChange={setPeriod} />
+    <div className="stack-lg">
+      <PageHeader
+        eyebrow="Finans"
+        title="Tahsilatlar"
+        description="Dairelerden alınan ödemeler. Ödeme girildiğinde borç ve kasa kendiliğinden güncellenir."
+        actions={<Link to="/tahsilat/yeni" className="btn"><Icon name="plus" /> Ödeme al</Link>}
+      />
+
+      <div className="toolbar">
+        <MonthSwitcher period={period} onChange={setPeriod} />
+        {data && data.length > 0 && (
+          <div className="summary-chip"><span>{data.length} ödeme</span><Money kurus={total} tone="good" /></div>
+        )}
+      </div>
       {actionError && <Alert kind="error">{actionError}</Alert>}
 
       {error ? (
@@ -41,36 +53,33 @@ export function PaymentsPage() {
       ) : data.length === 0 ? (
         <EmptyState>{formatPeriod(period)} ayında ödeme yok.</EmptyState>
       ) : (
-        <>
-          <div className="card row between">
-            <span className="muted">{data.length} ödeme</span>
-            <Money kurus={total} tone="good" />
-          </div>
-          <ul className="list">
-            {data.map((payment) => (
-              <li key={payment.id} className="list-item">
-                <Link to={`/daireler/${payment.apartmentId}`} className="door">{payment.apartmentLabel}</Link>
-                <span className="grow">
-                  <span className="title">{formatDate(payment.paidAt)}</span>
-                  <br />
-                  <span className="sub">
-                    {paymentMethodLabels[payment.method]}
-                    {payment.note ? ` · ${payment.note}` : ""}
-                  </span>
+        <ul className="list">
+          {data.map((payment) => (
+            <li key={payment.id} className="list-item">
+              <Link to={`/daireler/${payment.apartmentId}`} className="door" aria-label={`Daire ${payment.apartmentLabel}`}>
+                {payment.apartmentLabel}
+              </Link>
+              <span className="grow">
+                <span className="title">{formatDate(payment.paidAt)}</span>
+                <br />
+                <span className="sub">
+                  {paymentMethodLabels[payment.method]}
+                  {payment.note ? ` · ${payment.note}` : ""}
                 </span>
-                <Money kurus={payment.amountKurus} tone="good" />
-                <button
-                  type="button"
-                  className="icon-btn"
-                  aria-label="Ödemeyi sil"
-                  onClick={() => handleDelete(payment.id, payment.amountKurus, payment.apartmentLabel)}
-                >
-                  ✕
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+              </span>
+              <Money kurus={payment.amountKurus} tone="good" />
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="Ödemeyi sil"
+                title="Ödemeyi sil"
+                onClick={() => handleDelete(payment.id, payment.amountKurus, payment.apartmentLabel)}
+              >
+                <Icon name="trash" />
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

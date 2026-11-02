@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { expenseApi } from "../../api/endpoints";
 import type { ExpenseCategory } from "../../api/types";
 import { Alert } from "../../components/Feedback";
@@ -37,30 +37,33 @@ export function ExpenseFormPage() {
   const fields = error?.fields ?? {};
 
   return (
-    <div className="stack">
-      <PageHeader title="Gider ekle" backTo="/giderler" />
+    <div className="stack-lg form-page">
+      <PageHeader eyebrow="Giderler" title="Gider ekle" description="Kasadan çıkan her harcamayı kaydedin." backTo="/giderler" />
       <form className="card stack" onSubmit={handleSubmit}>
         {error && <Alert kind="error">{error.message}</Alert>}
         <Field label="Ne için" error={fields.category}>
-          <select value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} required>
+          <select id="expense-category" value={category} onChange={(e) => setCategory(e.target.value as ExpenseCategory)} required>
             <option value="" disabled>Seçin</option>
             {(Object.keys(expenseCategoryLabels) as ExpenseCategory[]).map((value) => (
               <option key={value} value={value}>{expenseCategoryLabels[value]}</option>
             ))}
           </select>
         </Field>
-        <Field label="Tutar (TL)" error={amountError ?? fields.amountKurus}>
-          <input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="450" required autoComplete="off" />
-        </Field>
-        <Field label="Tarih" error={fields.spentAt}>
-          <input type="date" value={spentAt} max={todayIso()} onChange={(e) => setSpentAt(e.target.value)} required />
-        </Field>
+        <div className="form-grid cols-2">
+          <Field label="Tutar (TL)" error={amountError ?? fields.amountKurus}>
+            <input id="expense-amount" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="450" required autoComplete="off" />
+          </Field>
+          <Field label="Tarih" error={fields.spentAt}>
+            <input id="expense-date" type="date" value={spentAt} max={todayIso()} onChange={(e) => setSpentAt(e.target.value)} required />
+          </Field>
+        </div>
         <Field label="Açıklama" error={fields.description}>
-          <input value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} placeholder="Örnek: Ekim ortak alan elektrik faturası" />
+          <input id="expense-description" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} placeholder="Örnek: Ekim ortak alan elektrik faturası" />
         </Field>
-        <button className="btn block" disabled={submitting}>
-          {submitting ? "Kaydediliyor…" : "Gideri kaydet"}
-        </button>
+        <div className="form-actions">
+          <Link to="/giderler" className="btn secondary">Vazgeç</Link>
+          <button className="btn" disabled={submitting}>{submitting ? "Kaydediliyor…" : "Gideri kaydet"}</button>
+        </div>
       </form>
     </div>
   );

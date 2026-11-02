@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { reportApi } from "../../api/endpoints";
 import { Badge, Balance } from "../../components/Display";
 import { EmptyState, ErrorState, Loading } from "../../components/Feedback";
+import { Icon } from "../../components/Icon";
 import { MonthSwitcher, usePeriodParam } from "../../components/MonthSwitcher";
 import { PageHeader } from "../../components/PageHeader";
 import { useAsync } from "../../hooks/useAsync";
@@ -14,14 +15,30 @@ export function DuesPage() {
   const [period, setPeriod] = usePeriodParam();
   const { data, error, loading, reload } = useAsync(() => reportApi.dues(period), [period]);
 
-  const chargeLink = (
-    <Link to={`/aidat/borclandir?ay=${period}`} className="btn small">Borç yaz</Link>
-  );
-
   return (
-    <div className="stack">
-      <PageHeader title="Aidat takibi" action={chargeLink} />
-      <MonthSwitcher period={period} onChange={setPeriod} />
+    <div className="stack-lg">
+      <PageHeader
+        eyebrow="Aidat"
+        title="Aidat takibi"
+        description="Seçtiğiniz ayın aidatını kimin ödediğini görün."
+        actions={
+          <Link to={`/aidat/borclandir?ay=${period}`} className="btn">
+            <Icon name="plus" /> Borç yaz
+          </Link>
+        }
+      />
+
+      <div className="toolbar">
+        <MonthSwitcher period={period} onChange={setPeriod} />
+        {data && data.rows.length > 0 && data.counts.none < data.rows.length && (
+          <div className="row wrap">
+            <Badge tone="good">{data.counts.paid} ödedi</Badge>
+            {data.counts.partial > 0 && <Badge tone="warn">{data.counts.partial} kısmen</Badge>}
+            <Badge tone="bad">{data.counts.unpaid} ödemedi</Badge>
+            {data.counts.none > 0 && <Badge tone="muted">{data.counts.none} yazılmadı</Badge>}
+          </div>
+        )}
+      </div>
 
       {error ? (
         <ErrorState error={error} onRetry={reload} />
@@ -34,17 +51,10 @@ export function DuesPage() {
       ) : data.counts.none === data.rows.length ? (
         <EmptyState>
           {formatPeriod(period)} için henüz aidat yazılmamış.
-          <br />
-          <Link to={`/aidat/borclandir?ay=${period}`} className="btn">Tüm dairelere aidat yaz</Link>
+          <Link to={`/aidat/borclandir?ay=${period}`} className="btn"><Icon name="plus" /> Tüm dairelere aidat yaz</Link>
         </EmptyState>
       ) : (
         <>
-          <div className="row wrap">
-            <Badge tone="good">{data.counts.paid} ödedi</Badge>
-            {data.counts.partial > 0 && <Badge tone="warn">{data.counts.partial} kısmen</Badge>}
-            <Badge tone="bad">{data.counts.unpaid} ödemedi</Badge>
-            {data.counts.none > 0 && <Badge tone="muted">{data.counts.none} yazılmadı</Badge>}
-          </div>
           <ul className="list">
             {data.rows.map((row) => (
               <li key={row.apartmentId}>
@@ -54,10 +64,11 @@ export function DuesPage() {
                     <span className="title">{row.residentNames.join(", ") || `Daire ${row.label}`}</span>
                     <br />
                     <span className="sub">
-                      {row.status === "partial"
-                        ? `${formatKurus(row.paidKurus)} / ${formatKurus(row.amountKurus)}`
-                        : "Toplam bakiye: "}
-                      {row.status !== "partial" && <Balance kurus={row.balanceKurus} />}
+                      {row.status === "partial" ? (
+                        `${formatKurus(row.paidKurus)} / ${formatKurus(row.amountKurus)} ödendi`
+                      ) : (
+                        <>Toplam bakiye: <Balance kurus={row.balanceKurus} /></>
+                      )}
                     </span>
                   </span>
                   <Badge tone={chargeStatusTone[row.status]}>{chargeStatusLabels[row.status]}</Badge>

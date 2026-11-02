@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apartman Marka Kiti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Plan: bu sayfa bir karar sayfası. Sayfanın kendi kabuğu nötr ve açık;
+   renk yalnızca aday paletlerin uygulandığı önizlemelerde görünür.
+   Yerleşim: üstte öneri, sonra 3 aday (her biri telefon + masaüstü önizleme), sonra yazı tipi, sonra elenenler. */
+:root {
+  --page-bg: #f6f6f4;
+  --page-surface: #ffffff;
+  --page-ink: #17181c;
+  --page-muted: #62646c;
+  --page-line: #e2e2de;
+  --page-accent: #20309a;
+  --font-display: "Instrument Serif", "Times New Roman", serif;
+  --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--page-bg);
+  color: var(--page-ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 400; }
+p { margin: 0; }
+a { color: var(--page-accent); }
+:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+/* ---------- Giriş ---------- */
+.intro { padding: 56px 0 28px; display: grid; gap: 14px; }
+.intro .kicker { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--page-muted); }
+.intro h1 { font-family: var(--font-display); font-size: clamp(40px, 6vw, 68px); line-height: 1.02; letter-spacing: -0.01em; }
+.intro h1 em { color: var(--page-accent); }
+.intro p { max-width: 64ch; color: var(--page-muted); font-size: 16px; }
+
+.verdict {
+  display: grid; gap: 18px; grid-template-columns: 1.3fr 1fr; align-items: center;
+  background: var(--page-surface); border: 1px solid var(--page-line); border-radius: 20px;
+  padding: 24px; margin-bottom: 44px;
+}
+.verdict h2 { font-family: var(--font-display); font-size: 30px; line-height: 1.1; }
+.verdict ul { margin: 10px 0 0; padding-left: 18px; color: var(--page-muted); display: grid; gap: 4px; }
+.verdict .pick { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.verdict .chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--page-line); font-weight: 600; font-size: 13px; background: #fbfbfa; }
+.verdict .dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgb(0 0 0 / 8%); }
+
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 0 0 18px; }
+.section-head h2 { font-family: var(--font-display); font-size: 36px; line-height: 1.1; }
+.section-head p { color: var(--page-muted); max-width: 60ch; }
+
+/* ---------- Aday kartı ---------- */
+.candidate {
+  background: var(--page-surface); border: 1px solid var(--page-line); border-radius: 24px;
+  padding: 24px; margin-bottom: 24px; display: grid; gap: 22px;
+}
+.candidate.recommended { border-color: var(--page-ink); box-shadow: 0 0 0 3px rgb(23 24 28 / 6%); }
+.cand-top { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: start; }
+.cand-letter { font-family: var(--font-display); font-size: 56px; line-height: .9; }
+.cand-title { display: flex; gap: 16px; align-items: flex-end; }
+.cand-title h3 { font-family: var(--font-display); font-size: 32px; line-height: 1.05; }
+.cand-title .mood { color: var(--page-muted); font-size: 14px; }
+.badge-rec { align-self: start; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: var(--page-ink); color: #fff; padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+
+.swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.swatch { border-radius: 14px; padding: 14px; min-height: 104px; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid rgb(0 0 0 / 7%); }
+.swatch b { font-family: var(--font-display); font-weight: 400; font-size: 20px; line-height: 1.1; }
+.swatch code { font-family: var(--font-body); font-size: 12px; font-weight: 700; letter-spacing: .06em; opacity: .85; margin-top: 4px; }
+.swatch .role { font-size: 11px; font-weight: 600; opacity: .8; margin-bottom: auto; }
+
+.tokens { display: flex; flex-wrap: wrap; gap: 6px; }
+.token { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--page-muted); border: 1px solid var(--page-line); border-radius: 999px; padding: 4px 10px 4px 4px; background: #fbfbfa; }
+.token i { width: 16px; height: 16px; border-radius: 50%; border: 1px solid rgb(0 0 0 / 8%); }
+
+.cand-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.notes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; font-size: 14px; }
+.notes h4 { margin: 0 0 4px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--page-muted); }
+.notes ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+
+.previews { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 18px; align-items: start; min-width: 0; }
+.desk-scroll { overflow-x: auto; border-radius: 16px; min-width: 0; }
+
+/* ---------- Önizleme: tema değişkenleri ---------- */
+.theme-a {
+  --p: #20309a; --p-hover: #18257d; --p-soft: #eceefa; --on-p: #ffffff;
+  --ink: #141a3c; --muted: #5d6382; --bg: #f5f6fa; --surface: #ffffff; --line: #e2e5ef;
+  --hero-bg: #20309a; --hero-ink: #ffffff; --hero-accent: #ffffff;
+  --good: #1d7a4c; --good-soft: #e7f4ed; --warn: #a8641a; --warn-soft: #fbf1e3; --bad: #bb232b; --bad-soft: #fbecec;
+  --mark: #bb232b;
+}
+.theme-b {
+  --p: #3a0f34; --p-hover: #2b0b27; --p-soft: #f3ecf2; --on-p: #ffffff;
+  --ink: #26101f; --muted: #6c6170; --bg: #f1f3f5; --surface: #ffffff; --line: #dde3e8;
+  --hero-bg: #3a0f34; --hero-ink: #ffffff; --hero-accent: #eaaa00;
+  --good: #2c7a50; --good-soft: #e8f4ec; --warn: #b8571a; --warn-soft: #fbeee4; --bad: #b42335; --bad-soft: #fbebee;
+  --mark: #eaaa00;
+}
+.theme-c {
+  --p: #6f3dff; --p-hover: #5a2ee6; --p-soft: #f0ebff; --on-p: #ffffff;
+  --ink: #17142e; --muted: #67687c; --bg: #f4f7fa; --surface: #ffffff; --line: #e1e5ec;
+  --hero-bg: #bfe9ff; --hero-ink: #17142e; --hero-accent: #6f3dff;
+  --good: #1f7a4d; --good-soft: #e8f5ee; --warn: #a8641a; --warn-soft: #fbf1e3; --bad: #c62f3a; --bad-soft: #fcecee;
+  --mark: #6f3dff;
+}
+
+/* ---------- Telefon önizlemesi ---------- */
+.phone {
+  width: 250px; border-radius: 34px; padding: 10px; background: #111216;
+  box-shadow: 0 20px 40px -18px rgb(0 0 0 / 35%);
+}
+.screen {
+  border-radius: 26px; overflow: hidden; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 11px; line-height: 1.4; height: 500px; display: flex; flex-direction: column;
+}
+.m-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 10px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.m-brand { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: 12px; }
+.m-mark { width: 22px; height: 22px; border-radius: 7px; background: var(--p); position: relative; }
+.m-mark::after { content: ""; position: absolute; right: -2px; top: -2px; width: 7px; height: 7px; border-radius: 50%; background: var(--mark); border: 2px solid var(--surface); }
+.m-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--p-soft); color: var(--p); display: grid; place-items: center; font-weight: 800; font-size: 10px; }
+.m-body { padding: 12px; display: grid; gap: 9px; flex: 1; overflow: hidden; align-content: start; }
+.m-greet { font-family: var(--font-display); font-size: 21px; line-height: 1.05; }
+.m-greet small { display: block; font-family: var(--font-body); font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--p); margin-bottom: 3px; }
+.m-hero { background: var(--hero-bg); color: var(--hero-ink); border-radius: 14px; padding: 12px; }
+.m-hero span { font-size: 9.5px; opacity: .85; }
+.m-hero strong { display: block; font-family: var(--font-display); font-weight: 400; font-size: 27px; line-height: 1.1; letter-spacing: -0.01em; }
+.m-hero em { font-style: normal; font-size: 9.5px; font-weight: 700; color: var(--hero-accent); }
+.m-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.m-btn { border-radius: 9px; padding: 8px 6px; text-align: center; font-weight: 700; font-size: 10.5px; }
+.m-btn.primary { background: var(--p); color: var(--on-p); }
+.m-btn.ghost { background: var(--surface); border: 1px solid var(--line); color: var(--ink); }
+.m-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.m-card h5 { margin: 0; padding: 8px 10px 6px; font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.m-item { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-top: 1px solid var(--line); }
+.m-door { width: 22px; height: 22px; border-radius: 6px; background: var(--p-soft); color: var(--p); display: grid; place-items: center; font-weight: 800; font-size: 10px; flex: none; }
+.m-item .who { flex: 1; min-width: 0; }
+.m-item .who b { display: block; font-size: 10.5px; }
+.m-item .who i { font-style: normal; color: var(--muted); font-size: 9px; }
+.pill { font-size: 8.5px; font-weight: 700; padding: 2px 6px; border-radius: 999px; white-space: nowrap; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.m-nav { display: grid; grid-template-columns: repeat(5, 1fr); background: var(--surface); border-top: 1px solid var(--line); padding: 7px 4px 10px; }
+.m-nav span { display: grid; justify-items: center; gap: 2px; font-size: 8px; font-weight: 700; color: var(--muted); }
+.m-nav span::before { content: ""; width: 16px; height: 16px; border-radius: 5px; border: 1.6px solid currentColor; }
+.m-nav span.on { color: var(--p); }
+
+/* ---------- Masaüstü önizlemesi ---------- */
+.desk {
+  min-width: 640px; border-radius: 16px; overflow: hidden; border: 1px solid var(--page-line);
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 11px; line-height: 1.4;
+  display: grid; grid-template-columns: 150px 1fr; height: 400px;
+}
+.d-side { background: var(--surface); border-right: 1px solid var(--line); padding: 14px 10px; display: grid; gap: 4px; align-content: start; }
+.d-side .m-brand { margin-bottom: 12px; padding: 0 4px; }
+.d-side small { font-size: 8.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 8px 6px 2px; }
+.d-link { padding: 7px 8px; border-radius: 8px; color: var(--muted); font-weight: 600; }
+.d-link.on { background: var(--p-soft); color: var(--p); }
+.d-main { padding: 16px 18px; display: grid; gap: 12px; align-content: start; }
+.d-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+.d-head h6 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1; }
+.d-head h6 + span { color: var(--muted); font-size: 10px; }
+.d-stats { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 9px; }
+.d-stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.d-stat span { color: var(--muted); font-size: 9.5px; font-weight: 600; }
+.d-stat strong { display: block; font-family: var(--font-display); font-weight: 400; font-size: 22px; line-height: 1.15; }
+.d-stat.hero { background: var(--hero-bg); color: var(--hero-ink); border-color: transparent; }
+.d-stat.hero span { color: inherit; opacity: .85; }
+.d-table { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.d-table .tr { display: grid; grid-template-columns: 34px 1fr 90px 74px; gap: 8px; align-items: center; padding: 7px 12px; border-top: 1px solid var(--line); }
+.d-table .tr.th { border-top: 0; color: var(--muted); font-size: 8.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: var(--bg); }
+.d-table .num { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+
+/* ---------- Yazı tipi ---------- */
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 44px; }
+.type-card { background: var(--page-surface); border: 1px solid var(--page-line); border-radius: 22px; padding: 24px; display: grid; gap: 14px; }
+.type-card.recommended { border-color: var(--page-ink); }
+.type-card .meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--page-muted); font-weight: 600; }
+.type-card .big { font-size: 44px; line-height: 1.02; }
+.type-card .para { font-size: 15px; color: #3a3c44; max-width: 52ch; }
+.type-card .nums { display: flex; flex-wrap: wrap; gap: 14px; font-size: 22px; font-variant-numeric: tabular-nums; }
+.type-card .glyphs { font-size: 18px; letter-spacing: .04em; color: var(--page-muted); }
+.pair-1 .big, .pair-1 .nums { font-family: "Instrument Serif", serif; }
+.pair-1 .para, .pair-1 .glyphs, .pair-1 .ui { font-family: "Manrope", sans-serif; }
+.pair-2 .big, .pair-2 .nums { font-family: "Fraunces", serif; font-weight: 400; }
+.pair-2 .para, .pair-2 .glyphs, .pair-2 .ui { font-family: "Plus Jakarta Sans", sans-serif; }
+.ui { display: flex; gap: 8px; flex-wrap: wrap; }
+.ui span { border: 1px solid var(--page-line); border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+.ui span.solid { background: var(--page-ink); color: #fff; border-color: var(--page-ink); }
+
+/* ---------- Elenenler ---------- */
+.dropped { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 44px; }
+.drop { background: var(--page-surface); border: 1px solid var(--page-line); border-radius: 18px; padding: 16px; display: grid; gap: 10px; }
+.drop .bar { display: flex; height: 34px; border-radius: 10px; overflow: hidden; }
+.drop .bar i { flex: 1; }
+.drop b { font-size: 14px; }
+.drop p { font-size: 13px; color: var(--page-muted); }
+
+.next { background: var(--page-ink); color: #fff; border-radius: 24px; padding: 28px; margin-bottom: 56px; display: grid; gap: 12px; }
+.next h2 { font-family: var(--font-display); font-size: 34px; line-height: 1.05; }
+.next p { color: #c9cad0; max-width: 70ch; }
+.next code { background: rgb(255 255 255 / 10%); padding: 2px 8px; border-radius: 6px; color: #fff; font-family: var(--font-body); font-weight: 700; }
+
+
+@media (max-width: 760px) {
+  .verdict { grid-template-columns: 1fr; }
+  .verdict .pick { justify-content: flex-start; }
+  .previews { grid-template-columns: minmax(0, 1fr); }
+  .phone { justify-self: center; }
+  .notes { grid-template-columns: 1fr; }
+  .candidate, .verdict { grid-template-columns: minmax(0, 1fr); }
+  .type-grid, .dropped { grid-template-columns: 1fr; }
+  .swatches { grid-template-columns: 1fr 1fr 1fr; }
+  .swatch { min-height: 88px; padding: 10px; }
+  .swatch b { font-size: 16px; }
+}
+@media (max-width: 420px) {
+  .wrap { padding: 0 16px; }
+  .candidate { padding: 18px; }
+  .cand-top { grid-template-columns: 1fr; }
+  .cand-letter { font-size: 44px; }
+  .cand-title h3 { font-size: 26px; }
+  .swatches { grid-template-columns: 1fr; }
+  .swatch { min-height: 64px; flex-direction: row; align-items: flex-end; justify-content: space-between; }
+  .swatch .role { margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="intro">
+    <span class="kicker">Apartman Yönetimi · Marka kiti · Taslak 1</span>
+    <h1>Hangi renkler bu apartmanı <em>en iyi</em> anlatır?</h1>
+    <p>Gönderdiğin altı paletten üçünü kısa listeye aldım ve her birini doğrudan uygulamamızın ekranlarına giydirdim. Önizlemelerdeki rakamlar ve isimler sistemdeki deneme verisi. Zemin her adayda açık; renk yalnızca vurgu, düğme ve öne çıkan kartlarda.</p>
+  </header>
+
+  <section class="verdict" aria-labelledby="verdict-title">
+    <div>
+      <h2 id="verdict-title">Önerim: A, Royal Blue + Pure White + Tomato Red; başlıklarda Instrument Serif, metinde Manrope.</h2>
+      <ul>
+        <li>Mavi, para ve güven işlerinin (banka, sigorta, yönetim) evrensel rengi; babanın ilk bakışta "resmî ve sağlam" diyeceği ton.</li>
+        <li>Paletteki domates kırmızısı bizim sistemde zaten "borç" anlamına geliyor. Ayrı bir vurgu rengi daha eklemek yerine kırmızıyı yalnızca dikkat gereken yerlere ayırıyoruz; palet anlamıyla birlikte çalışıyor.</li>
+        <li>Zarif serif başlıklar sitenin "premium" duruşunu veriyor, sade Manrope ise tutarları ve formları telefonda net okutuyor.</li>
+      </ul>
+    </div>
+    <div class="pick" aria-label="Önerilen renkler">
+      <span class="chip"><i class="dot" style="background:#20309a"></i>Royal Blue #20309A</span>
+      <span class="chip"><i class="dot" style="background:#ffffff"></i>Pure White #FFFFFF</span>
+      <span class="chip"><i class="dot" style="background:#bb232b"></i>Tomato Red #BB232B</span>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>Kısa liste</h2>
+    <p>Her adayda üstte senin paletin, altında o paletten türettiğim arayüz renkleri, sağda telefon ve masaüstü görünümü var.</p>
+  </div>
+
+  <!-- ===================== A ===================== -->
+  <article class="candidate recommended theme-a" aria-labelledby="cand-a">
+    <div class="cand-top">
+      <div class="cand-title">
+        <span class="cand-letter">A</span>
+        <div>
+          <h3 id="cand-a">Güven veren klasik</h3>
+          <span class="mood">Royal Blue · Pure White · Tomato Red</span>
+        </div>
+      </div>
+      <span class="badge-rec">Önerilen</span>
+    </div>
+    <div class="swatches">
+      <div class="swatch" style="background:#20309a;color:#fff"><span class="role">Ana renk: düğmeler, seçili menü, kasa kartı</span><b>Royal Blue</b><code>#20309A</code></div>
+      <div class="swatch" style="background:#ffffff;color:#141a3c"><span class="role">Kartlar ve yüzeyler</span><b>Pure White</b><code>#FFFFFF</code></div>
+      <div class="swatch" style="background:#bb232b;color:#fff"><span class="role">Yalnızca borç ve uyarı</span><b>Tomato Red</b><code>#BB232B</code></div>
+    </div>
+    <div class="tokens" aria-label="Türetilen arayüz renkleri">
+      <span class="token"><i style="background:#f5f6fa"></i>Zemin #F5F6FA</span>
+      <span class="token"><i style="background:#eceefa"></i>Açık mavi #ECEEFA</span>
+      <span class="token"><i style="background:#141a3c"></i>Yazı #141A3C</span>
+      <span class="token"><i style="background:#5d6382"></i>İkincil yazı #5D6382</span>
+      <span class="token"><i style="background:#1d7a4c"></i>Ödendi #1D7A4C</span>
+      <span class="token"><i style="background:#a8641a"></i>Kısmen #A8641A</span>
+    </div>
+    <div class="cand-body">
+      <div class="notes">
+        <div><h4>Güçlü yanları</h4><ul><li>En kurumsal, en "güvenilir" duran aday</li><li>Kırmızının anlamı netleşiyor: kırmızı gördüğün yerde ilgilenmen gereken bir borç var</li><li>Yaşlı kullanıcılar için kontrast çok yüksek</li></ul></div>
+        <div><h4>Dikkat</h4><ul><li>Mavi sık görülen bir renk; özgünlüğü yazı tipi ve düzen taşıyacak</li><li>Kırmızı hiçbir zaman süs olarak kullanılmayacak</li></ul></div>
+      </div>
+      <div class="previews">
+        <div class="phone" role="img" aria-label="A paleti telefon önizlemesi">
+          <div class="screen">
+            <div class="m-top"><span class="m-brand"><span class="m-mark"></span>Apartman</span><span class="m-avatar">D</span></div>
+            <div class="m-body">
+              <div class="m-greet"><small>Kasım 2026</small>İyi günler.</div>
+              <div class="m-hero"><span>Kasadaki para</span><strong>₺40.079,50</strong><em>Kasa hareketleri →</em></div>
+              <div class="m-row"><span class="m-btn primary">+ Ödeme al</span><span class="m-btn ghost">+ Gider ekle</span></div>
+              <div class="m-card"><h5>Kasım aidatı</h5>
+                <div class="m-item"><span class="m-door">6</span><span class="who"><b>Ayşe Demir</b><i>₺4.900,00 borç</i></span><span class="pill bad">Ödenmedi</span></div>
+                <div class="m-item"><span class="m-door">5</span><span class="who"><b>Ömer Yıldız</b><i>₺750 / ₺1.500</i></span><span class="pill warn">Kısmen</span></div>
+                <div class="m-item"><span class="m-door">3</span><span class="who"><b>İsmail Şahin</b><i>Borç yok</i></span><span class="pill good">Ödendi</span></div>
+              </div>
+            </div>
+            <div class="m-nav"><span class="on">Özet</span><span>Daireler</span><span>Aidat</span><span>Tahsilat</span><span>Gider</span></div>
+          </div>
+        </div>
+        <div class="desk-scroll">
+          <div class="desk" role="img" aria-label="A paleti masaüstü önizlemesi">
+            <aside class="d-side"><span class="m-brand"><span class="m-mark"></span>Apartman</span><small>Genel</small><span class="d-link on">Genel bakış</span><span class="d-link">Daireler</span><span class="d-link">Aidat takibi</span><small>Finans</small><span class="d-link">Tahsilatlar</span><span class="d-link">Giderler</span><span class="d-link">Kasa</span></aside>
+            <div class="d-main">
+              <div class="d-head"><div><h6>Genel bakış</h6><span>Kasım 2026 · 6 daire, 15 kişi</span></div><span class="m-btn primary" style="padding:8px 14px">+ Ödeme al</span></div>
+              <div class="d-stats"><div class="d-stat hero"><span>Kasadaki para</span><strong>₺40.079,50</strong></div><div class="d-stat"><span>Bekleyen alacak</span><strong style="color:var(--bad)">₺10.250,00</strong></div><div class="d-stat"><span>Bu ay tahsilat</span><strong>₺14.650,00</strong></div></div>
+              <div class="d-table">
+                <div class="tr th"><span>No</span><span>Sakin</span><span style="text-align:right">Bakiye</span><span>Durum</span></div>
+                <div class="tr"><span class="m-door">6</span><span>Ayşe Demir</span><span class="num" style="color:var(--bad)">₺4.900,00</span><span class="pill bad">Ödenmedi</span></div>
+                <div class="tr"><span class="m-door">4</span><span>Zeynep Koç</span><span class="num" style="color:var(--bad)">₺3.400,00</span><span class="pill bad">Ödenmedi</span></div>
+                <div class="tr"><span class="m-door">5</span><span>Ömer Yıldız</span><span class="num">₺1.150,00</span><span class="pill warn">Kısmen</span></div>
+                <div class="tr"><span class="m-door">3</span><span>İsmail Şahin</span><span class="num" style="color:var(--good)">₺0,00</span><span class="pill good">Ödendi</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===================== B ===================== -->
+  <article class="candidate theme-b" aria-labelledby="cand-b">
+    <div class="cand-top">
+      <div class="cand-title">
+        <span class="cand-letter">B</span>
+        <div>
+          <h3 id="cand-b">Butik konut, sıcak premium</h3>
+          <span class="mood">Ice Silver · Deep Aubergine · Marigold</span>
+        </div>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="swatch" style="background:#dde3e8;color:#26101f"><span class="role">Zemin ve çizgiler</span><b>Ice Silver</b><code>#DDE3E8</code></div>
+      <div class="swatch" style="background:#3a0f34;color:#fff"><span class="role">Ana renk: düğmeler, kasa kartı</span><b>Deep Aubergine</b><code>#3A0F34</code></div>
+      <div class="swatch" style="background:#eaaa00;color:#26101f"><span class="role">Vurgu: önemli rakam, işaret</span><b>Marigold</b><code>#EAAA00</code></div>
+    </div>
+    <div class="tokens" aria-label="Türetilen arayüz renkleri">
+      <span class="token"><i style="background:#f1f3f5"></i>Zemin #F1F3F5</span>
+      <span class="token"><i style="background:#f3ecf2"></i>Açık patlıcan #F3ECF2</span>
+      <span class="token"><i style="background:#26101f"></i>Yazı #26101F</span>
+      <span class="token"><i style="background:#2c7a50"></i>Ödendi #2C7A50</span>
+      <span class="token"><i style="background:#b8571a"></i>Kısmen #B8571A</span>
+      <span class="token"><i style="background:#b42335"></i>Ödenmedi #B42335</span>
+    </div>
+    <div class="cand-body">
+      <div class="notes">
+        <div><h4>Güçlü yanları</h4><ul><li>En özgün ve en "lüks site" havasında olan aday</li><li>Lüks konut projelerinin tanıtım sitelerini andırıyor</li></ul></div>
+        <div><h4>Dikkat</h4><ul><li>Patlıcan rengi düğmeler ve kasa kartı koyu kalıyor; "koyu olmasın" isteğine en uzak aday</li><li>Sarı vurgu ile "kısmen ödendi" turuncusu birbirine yakın; ayırt etmek için durum rengini kaydırmam gerekti</li></ul></div>
+      </div>
+      <div class="previews">
+        <div class="phone" role="img" aria-label="B paleti telefon önizlemesi">
+          <div class="screen">
+            <div class="m-top"><span class="m-brand"><span class="m-mark"></span>Apartman</span><span class="m-avatar">D</span></div>
+            <div class="m-body">
+              <div class="m-greet"><small>Kasım 2026</small>İyi günler.</div>
+              <div class="m-hero"><span>Kasadaki para</span><strong>₺40.079,50</strong><em>Kasa hareketleri →</em></div>
+              <div class="m-row"><span class="m-btn primary">+ Ödeme al</span><span class="m-btn ghost">+ Gider ekle</span></div>
+              <div class="m-card"><h5>Kasım aidatı</h5>
+                <div class="m-item"><span class="m-door">6</span><span class="who"><b>Ayşe Demir</b><i>₺4.900,00 borç</i></span><span class="pill bad">Ödenmedi</span></div>
+                <div class="m-item"><span class="m-door">5</span><span class="who"><b>Ömer Yıldız</b><i>₺750 / ₺1.500</i></span><span class="pill warn">Kısmen</span></div>
+                <div class="m-item"><span class="m-door">3</span><span class="who"><b>İsmail Şahin</b><i>Borç yok</i></span><span class="pill good">Ödendi</span></div>
+              </div>
+            </div>
+            <div class="m-nav"><span class="on">Özet</span><span>Daireler</span><span>Aidat</span><span>Tahsilat</span><span>Gider</span></div>
+          </div>
+        </div>
+        <div class="desk-scroll">
+          <div class="desk" role="img" aria-label="B paleti masaüstü önizlemesi">
+            <aside class="d-side"><span class="m-brand"><span class="m-mark"></span>Apartman</span><small>Genel</small><span class="d-link on">Genel bakış</span><span class="d-link">Daireler</span><span class="d-link">Aidat takibi</span><small>Finans</small><span class="d-link">Tahsilatlar</span><span class="d-link">Giderler</span><span class="d-link">Kasa</span></aside>
+            <div class="d-main">
+              <div class="d-head"><div><h6>Genel bakış</h6><span>Kasım 2026 · 6 daire, 15 kişi</span></div><span class="m-btn primary" style="padding:8px 14px">+ Ödeme al</span></div>
+              <div class="d-stats"><div class="d-stat hero"><span>Kasadaki para</span><strong>₺40.079,50</strong></div><div class="d-stat"><span>Bekleyen alacak</span><strong style="color:var(--bad)">₺10.250,00</strong></div><div class="d-stat"><span>Bu ay tahsilat</span><strong>₺14.650,00</strong></div></div>
+              <div class="d-table">
+                <div class="tr th"><span>No</span><span>Sakin</span><span style="text-align:right">Bakiye</span><span>Durum</span></div>
+                <div class="tr"><span class="m-door">6</span><span>Ayşe Demir</span><span class="num" style="color:var(--bad)">₺4.900,00</span><span class="pill bad">Ödenmedi</span></div>
+                <div class="tr"><span class="m-door">4</span><span>Zeynep Koç</span><span class="num" style="color:var(--bad)">₺3.400,00</span><span class="pill bad">Ödenmedi</span></div>
+                <div class="tr"><span class="m-door">5</span><span>Ömer Yıldız</span><span class="num">₺1.150,00</span><span class="pill warn">Kısmen</span></div>
+                <div class="tr"><span class="m-door">3</span><span>İsmail Şahin</span><span class="num" style="color:var(--good)">₺0,00</span><span class="pill good">Ödendi</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===================== C ===================== -->
+  <article class="candidate theme-c" aria-labelledby="cand-c">
+    <div class="cand-top">
+      <div class="cand-title">
+        <span class="cand-letter">C</span>
+        <div>
+          <h3 id="cand-c">Ferah ve modern</h3>
+          <span class="mood">Glacier Blue · Ultraviolet · Mineral Grey</span>
+        </div>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="swatch" style="background:#bfe9ff;color:#17142e"><span class="role">Öne çıkan kart, açık vurgu</span><b>Glacier Blue</b><code>#BFE9FF</code></div>
+      <div class="swatch" style="background:#6f3dff;color:#fff"><span class="role">Ana renk: düğmeler, seçili menü</span><b>Ultraviolet</b><code>#6F3DFF</code></div>
+      <div class="swatch" style="background:#b7b7b7;color:#17142e"><span class="role">Çizgi ve pasif öğeler</span><b>Mineral Grey</b><code>#B7B7B7</code></div>
+    </div>
+    <div class="tokens" aria-label="Türetilen arayüz renkleri">
+      <span class="token"><i style="background:#f4f7fa"></i>Zemin #F4F7FA</span>
+      <span class="token"><i style="background:#f0ebff"></i>Açık mor #F0EBFF</span>
+      <span class="token"><i style="background:#17142e"></i>Yazı #17142E</span>
+      <span class="token"><i style="background:#1f7a4d"></i>Ödendi #1F7A4D</span>
+      <span class="token"><i style="background:#a8641a"></i>Kısmen #A8641A</span>
+      <span class="token"><i style="background:#c62f3a"></i>Ödenmedi #C62F3A</span>
+    </div>
+    <div class="cand-body">
+      <div class="notes">
+        <div><h4>Güçlü yanları</h4><ul><li>En aydınlık, en genç aday; kasa kartı bile açık renk</li><li>"Koyu olmasın" isteğine en uygun olanı</li></ul></div>
+        <div><h4>Dikkat</h4><ul><li>Mor, kurumsallıktan çok teknoloji girişimi havası veriyor</li><li>Şu anki arayüzdeki mor tonlara çok yakın; değişim hissi az olur</li></ul></div>
+      </div>
+      <div class="previews">
+        <div class="phone" role="img" aria-label="C paleti telefon önizlemesi">
+          <div class="screen">
+            <div class="m-top"><span class="m-brand"><span class="m-mark"></span>Apartman</span><span class="m-avatar">D</span></div>
+            <div class="m-body">
+              <div class="m-greet"><small>Kasım 2026</small>İyi günler.</div>
+              <div class="m-hero"><span>Kasadaki para</span><strong>₺40.079,50</strong><em>Kasa hareketleri →</em></div>
+              <div class="m-row"><span class="m-btn primary">+ Ödeme al</span><span class="m-btn ghost">+ Gider ekle</span></div>
+              <div class="m-card"><h5>Kasım aidatı</h5>
+                <div class="m-item"><span class="m-door">6</span><span class="who"><b>Ayşe Demir</b><i>₺4.900,00 borç</i></span><span class="pill bad">Ödenmedi</span></div>
+                <div class="m-item"><span class="m-door">5</span><span class="who"><b>Ömer Yıldız</b><i>₺750 / ₺1.500</i></span><span class="pill warn">Kısmen</span></div>
+                <div class="m-item"><span class="m-door">3</span><span class="who"><b>İsmail Şahin</b><i>Borç yok</i></span><span class="pill good">Ödendi</span></div>
+              </div>
+            </div>
+            <div class="m-nav"><span class="on">Özet</span><span>Daireler</span><span>Aidat</span><span>Tahsilat</span><span>Gider</span></div>
+          </div>
+        </div>
+        <div class="desk-scroll">
+          <div class="desk" role="img" aria-label="C paleti masaüstü önizlemesi">
+            <aside class="d-side"><span class="m-brand"><span class="m-mark"></span>Apartman</span><small>Genel</small><span class="d-link on">Genel bakış</span><span class="d-link">Daireler</span><span class="d-link">Aidat takibi</span><small>Finans</small><span class="d-link">Tahsilatlar</span><span class="d-link">Giderler</span><span class="d-link">Kasa</span></aside>
+            <div class="d-main">
+              <div class="d-head"><div><h6>Genel bakış</h6><span>Kasım 2026 · 6 daire, 15 kişi</span></div><span class="m-btn primary" style="padding:8px 14px">+ Ödeme al</span></div>
+              <div class="d-stats"><div class="d-stat hero"><span>Kasadaki para</span><strong>₺40.079,50</strong></div><div class="d-stat"><span>Bekleyen alacak</span><strong style="color:var(--bad)">₺10.250,00</strong></div><div class="d-stat"><span>Bu ay tahsilat</span><strong>₺14.650,00</strong></div></div>
+              <div class="d-table">
+                <div class="tr th"><span>No</span><span>Sakin</span><span style="text-align:right">Bakiye</span><span>Durum</span></div>
+                <div class="tr"><span class="m-door">6</span><span>Ayşe Demir</span><span class="num" style="color:var(--bad)">₺4.900,00</span><span class="pill bad">Ödenmedi</span></div>
+                <div class="tr"><span class="m-door">4</span><span>Zeynep Koç</span><span class="num" style="color:var(--bad)">₺3.400,00</span><span class="pill bad">Ödenmedi</span></div>
+                <div class="tr"><span class="m-door">5</span><span>Ömer Yıldız</span><span class="num">₺1.150,00</span><span class="pill warn">Kısmen</span></div>
+                <div class="tr"><span class="m-door">3</span><span>İsmail Şahin</span><span class="num" style="color:var(--good)">₺0,00</span><span class="pill good">Ödendi</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ===================== Yazı tipi ===================== -->
+  <div class="section-head" style="margin-top:44px">
+    <h2>Yazı tipi</h2>
+    <p>"Premium gerçek site" hissini en çok başlık yazı tipi verir. İki eşleşme önerdim; ikisi de Türkçe harflerin tamamını destekliyor ve telefonda okunaklı.</p>
+  </div>
+  <div class="type-grid">
+    <div class="type-card pair-1 recommended">
+      <div class="meta"><span>1 · Önerilen</span><span>Başlık: Instrument Serif · Metin: Manrope</span></div>
+      <div class="big">Kasım aidatları tahsil edildi.</div>
+      <p class="para">Zarif, ince bir serif başlık ile geometrik ve çok net bir metin yazısı. Gönderdiğin "Ocean Instinct" ve "Midnight Black" örneklerindeki dergi havasına en yakın eşleşme.</p>
+      <div class="nums"><span>₺40.079,50</span><span>₺1.500,00</span><span>6 daire</span></div>
+      <div class="glyphs">Ğ Ü Ş İ Ö Ç · ğ ü ş ı ö ç · Şükrü Öztürk, İğdeli</div>
+      <div class="ui"><span class="solid">Ödeme al</span><span>Gider ekle</span><span>Ödenmedi</span></div>
+    </div>
+    <div class="type-card pair-2">
+      <div class="meta"><span>2 · Alternatif</span><span>Başlık: Fraunces · Metin: Plus Jakarta Sans</span></div>
+      <div class="big">Kasım aidatları tahsil edildi.</div>
+      <p class="para">Daha yumuşak ve sıcak bir serif ile biraz daha yuvarlak bir metin yazısı. Daha samimi bir his verir; B paletiyle özellikle iyi gider.</p>
+      <div class="nums"><span>₺40.079,50</span><span>₺1.500,00</span><span>6 daire</span></div>
+      <div class="glyphs">Ğ Ü Ş İ Ö Ç · ğ ü ş ı ö ç · Şükrü Öztürk, İğdeli</div>
+      <div class="ui"><span class="solid">Ödeme al</span><span>Gider ekle</span><span>Ödenmedi</span></div>
+    </div>
+  </div>
+
+  <!-- ===================== Elenenler ===================== -->
+  <div class="section-head">
+    <h2>Neden elendiler</h2>
+    <p>Güzel paletler, ama bu siteyle ve babanın kullanımıyla uyuşmayan yanları var.</p>
+  </div>
+  <div class="dropped">
+    <div class="drop">
+      <div class="bar"><i style="background:#030407"></i><i style="background:#1558c9"></i><i style="background:#d4ff24"></i></div>
+      <b>Midnight Black · Electric Cobalt · Acid Lime</b>
+      <p>Siyah zemin üstüne neon yeşil: teknoloji ürünü tanıtımı için harika, ama koyu ve bir yönetim paneli için fazla gürültülü. Neon yeşil "ödendi" yeşiliyle de karışır.</p>
+    </div>
+    <div class="drop">
+      <div class="bar"><i style="background:#929da7"></i><i style="background:#17191c"></i><i style="background:#ff4b32"></i></div>
+      <b>Cool Steel Grey · Midnight Charcoal · Vibrant Coral</b>
+      <p>Mercan turuncusu ana renk olunca her düğme "borç/uyarı" gibi görünür; kömür siyahı da koyu tarafta kalıyor.</p>
+    </div>
+    <div class="drop">
+      <div class="bar"><i style="background:#6f4e37"></i><i style="background:#e5e4e2"></i><i style="background:#e6e0f0"></i></div>
+      <b>Mocha Brown · Platinum Silver · Pale Lavender</b>
+      <p>Çok şık ama bütün tonlar yumuşak; düğmeler ve durumlar yeterince öne çıkmıyor. Kahverengi arayüzde zamanla eski görünebilir.</p>
+    </div>
+  </div>
+
+  <section class="next" aria-labelledby="next-title">
+    <h2 id="next-title">Senden bir cevap yeterli</h2>
+    <p>Sohbete harf ve rakamla yaz, örneğin <code>A + 1</code>. İstersen karıştırabiliriz (örneğin A'nın renkleri, 2'nin yazı tipleri) ya da bir rengi değiştirmemi isteyebilirsin. Seçimden sonra kesin marka kurallarını (renkler, yazı ölçüleri, köşe yuvarlaklığı, düğme ve kart stilleri) çıkarıp siteyi masaüstü ve telefon için yeniden tasarlamaya başlıyorum.</p>
+  </section>
+
+</div>
+</body>
+</html>

@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { apartmentApi, chargeApi, paymentApi, reportApi } from "../../api/endpoints";
 import { Badge, Balance, Money } from "../../components/Display";
 import { Alert, EmptyState, ErrorState, Loading } from "../../components/Feedback";
+import { Icon } from "../../components/Icon";
 import { PageHeader } from "../../components/PageHeader";
 import { toApiError, useAsync } from "../../hooks/useAsync";
 import { formatDate, formatPeriod } from "../../lib/dates";
@@ -38,174 +39,199 @@ export function ApartmentDetailPage() {
   const activeResidents = apartment.residents.filter((r) => r.isActive);
   const movedOut = apartment.residents.filter((r) => !r.isActive);
   const back = encodeURIComponent(`/daireler/${apartmentId}`);
+  const floorText = apartment.floor === null ? null : apartment.floor === 0 ? "Zemin kat" : `${apartment.floor}. kat`;
 
   return (
-    <div className="stack">
+    <div className="stack-lg">
       <PageHeader
+        eyebrow="Daire"
         title={`Daire ${apartment.label}`}
         backTo="/daireler"
-        action={<Link to={`/daireler/${apartmentId}/duzenle`} className="btn small secondary">Düzenle</Link>}
+        actions={
+          <Link to={`/daireler/${apartmentId}/duzenle`} className="btn secondary small">
+            <Icon name="edit" /> Düzenle
+          </Link>
+        }
       />
 
       {actionError && <Alert kind="error">{actionError}</Alert>}
 
-      <div className="card stack">
-        <div className="row between">
-          <span className="muted">Bakiye</span>
-          <span className="balance-big"><Balance kurus={statement.balanceKurus} /></span>
+      <div className="two-col aside-left">
+        {/* Sol sütun: hesap özeti ve sakinler */}
+        <div className="stack-lg">
+          <section className="card account-card" aria-label="Hesap özeti">
+            <div className="account-top">
+              <div>
+                <div className="account-label">Güncel bakiye</div>
+                <div className="balance-big"><Balance kurus={statement.balanceKurus} /></div>
+              </div>
+            </div>
+            <div className="breakdown">
+              <span>Toplam borç</span><Money kurus={statement.totalChargedKurus} />
+              <span>Ödenen</span><Money kurus={statement.totalPaidKurus} tone="good" />
+            </div>
+            <div className="btn-grid">
+              <Link to={`/tahsilat/yeni?daire=${apartmentId}&geri=${back}`} className="btn"><Icon name="plus" /> Ödeme al</Link>
+              <Link to={`/daireler/${apartmentId}/borc-ekle`} className="btn secondary"><Icon name="plus" /> Borç ekle</Link>
+            </div>
+            <div className="facts">
+              {floorText && <span className="fact"><Icon name="layers" /> {floorText}</span>}
+              <span className="fact"><Icon name="users" /> {apartment.householdSize} kişi oturuyor</span>
+            </div>
+            {apartment.note && <p className="note">{apartment.note}</p>}
+          </section>
+
+          <section className="stack">
+            <h2 className="section-title">
+              Sakinler
+              <Link to={`/daireler/${apartmentId}/sakin-ekle`} className="btn secondary small"><Icon name="plus" /> Sakin</Link>
+            </h2>
+            {activeResidents.length === 0 ? (
+              <EmptyState>Kayıtlı sakin yok.</EmptyState>
+            ) : (
+              <ul className="list">
+                {activeResidents.map((resident) => (
+                  <li key={resident.id} className="list-item">
+                    <Link to={`/daireler/${apartmentId}/sakinler/${resident.id}`} className="grow plain-link">
+                      <span className="title">{resident.fullName}</span>
+                      <br />
+                      <span className="sub">
+                        {residentKindLabels[resident.kind]}
+                        {resident.phone ? ` · ${resident.phone}` : ""}
+                      </span>
+                    </Link>
+                    {resident.phone && (
+                      <a href={`tel:${resident.phone.replace(/[^\d+]/g, "")}`} className="btn secondary small" aria-label={`${resident.fullName} ara`}>
+                        <Icon name="phone" /> Ara
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {movedOut.length > 0 && (
+              <button type="button" className="btn secondary small" onClick={() => setShowMovedOut((v) => !v)}>
+                {showMovedOut ? "Taşınanları gizle" : `Taşınanlar (${movedOut.length})`}
+              </button>
+            )}
+            {showMovedOut && (
+              <ul className="list">
+                {movedOut.map((resident) => (
+                  <li key={resident.id}>
+                    <Link to={`/daireler/${apartmentId}/sakinler/${resident.id}`} className="list-item">
+                      <span className="grow">
+                        <span className="title muted">{resident.fullName}</span>
+                        <br />
+                        <span className="sub">{residentKindLabels[resident.kind]} · taşındı</span>
+                      </span>
+                      <Icon name="chevron" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
-        <div className="row between small muted">
-          <span>Toplam borç {formatKurus(statement.totalChargedKurus)}</span>
-          <span>Ödenen {formatKurus(statement.totalPaidKurus)}</span>
+
+        {/* Sağ sütun: borç ve ödeme geçmişi */}
+        <div className="stack-lg">
+          <section className="stack">
+            <h2 className="section-title">Borçlar</h2>
+            {statement.charges.length === 0 ? (
+              <EmptyState>Bu daireye henüz borç yazılmamış.</EmptyState>
+            ) : (
+              <ul className="list">
+                {statement.charges.map((charge) => (
+                  <li key={charge.id} className="list-item">
+                    <span className="grow">
+                      <span className="title">
+                        {charge.kind === "dues" ? `${formatPeriod(charge.period)} aidatı` : charge.description}
+                      </span>
+                      <br />
+                      <span className="sub">
+                        Son ödeme {formatDate(charge.dueDate)}
+                        {charge.status === "partial" && ` · ${formatKurus(charge.paidKurus)} ödendi`}
+                      </span>
+                    </span>
+                    <span className="right">
+                      <Money kurus={charge.amountKurus} />
+                      <br />
+                      <Badge tone={chargeStatusTone[charge.status]}>{chargeStatusLabels[charge.status]}</Badge>
+                    </span>
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      aria-label="Borcu sil"
+                      title="Borcu sil"
+                      onClick={() =>
+                        confirmAndRun("Bu borç kaydı silinsin mi?", async () => {
+                          await chargeApi.delete(charge.id);
+                          reload();
+                        })
+                      }
+                    >
+                      <Icon name="trash" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="stack">
+            <h2 className="section-title">Ödemeler</h2>
+            {statement.payments.length === 0 ? (
+              <EmptyState>Henüz ödeme yok.</EmptyState>
+            ) : (
+              <ul className="list">
+                {statement.payments.map((payment) => (
+                  <li key={payment.id} className="list-item">
+                    <span className="grow">
+                      <span className="title">{formatDate(payment.paidAt)}</span>
+                      <br />
+                      <span className="sub">
+                        {paymentMethodLabels[payment.method]}
+                        {payment.note ? ` · ${payment.note}` : ""}
+                      </span>
+                    </span>
+                    <Money kurus={payment.amountKurus} tone="good" />
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      aria-label="Ödemeyi sil"
+                      title="Ödemeyi sil"
+                      onClick={() =>
+                        confirmAndRun(`${formatKurus(payment.amountKurus)} tutarındaki ödeme silinsin mi?`, async () => {
+                          await paymentApi.delete(payment.id);
+                          reload();
+                        })
+                      }
+                    >
+                      <Icon name="trash" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="stack">
+            <button
+              type="button"
+              className="btn danger block"
+              onClick={() =>
+                confirmAndRun(`Daire ${apartment.label} silinsin mi?`, async () => {
+                  await apartmentApi.delete(apartmentId);
+                  navigate("/daireler", { replace: true });
+                })
+              }
+            >
+              <Icon name="trash" /> Daireyi sil
+            </button>
+            <p className="note">Yalnızca sakin, borç ve ödeme kaydı olmayan daire silinebilir.</p>
+          </section>
         </div>
-        <div className="btn-grid">
-          <Link to={`/tahsilat/yeni?daire=${apartmentId}&geri=${back}`} className="btn">+ Ödeme al</Link>
-          <Link to={`/daireler/${apartmentId}/borc-ekle`} className="btn secondary">+ Borç ekle</Link>
-        </div>
-        <div className="row wrap small muted">
-          {apartment.floor !== null && <span>{apartment.floor}. kat ·</span>}
-          <span>{apartment.householdSize} kişi oturuyor</span>
-        </div>
-        {apartment.note && <div className="small">{apartment.note}</div>}
       </div>
-
-      <h2 className="section-title">
-        Sakinler
-        <Link to={`/daireler/${apartmentId}/sakin-ekle`} className="btn small secondary">+ Sakin</Link>
-      </h2>
-      {activeResidents.length === 0 ? (
-        <EmptyState>Kayıtlı sakin yok.</EmptyState>
-      ) : (
-        <ul className="list">
-          {activeResidents.map((resident) => (
-            <li key={resident.id} className="list-item">
-              <Link to={`/daireler/${apartmentId}/sakinler/${resident.id}`} className="grow plain-link">
-                <span className="title">{resident.fullName}</span>
-                <br />
-                <span className="sub">
-                  {residentKindLabels[resident.kind]}
-                  {resident.phone ? ` · ${resident.phone}` : ""}
-                </span>
-              </Link>
-              {resident.phone && (
-                <a href={`tel:${resident.phone.replace(/[^\d+]/g, "")}`} className="btn small secondary" aria-label={`${resident.fullName} ara`}>
-                  Ara
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      {movedOut.length > 0 && (
-        <button type="button" className="btn small secondary" onClick={() => setShowMovedOut((v) => !v)}>
-          {showMovedOut ? "Taşınanları gizle" : `Taşınanlar (${movedOut.length})`}
-        </button>
-      )}
-      {showMovedOut && (
-        <ul className="list">
-          {movedOut.map((resident) => (
-            <li key={resident.id}>
-              <Link to={`/daireler/${apartmentId}/sakinler/${resident.id}`} className="list-item">
-                <span className="grow">
-                  <span className="title muted">{resident.fullName}</span>
-                  <br />
-                  <span className="sub">{residentKindLabels[resident.kind]} · taşındı</span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <h2 className="section-title">Borçlar</h2>
-      {statement.charges.length === 0 ? (
-        <EmptyState>Bu daireye henüz borç yazılmamış.</EmptyState>
-      ) : (
-        <ul className="list">
-          {statement.charges.map((charge) => (
-            <li key={charge.id} className="list-item">
-              <span className="grow">
-                <span className="title">
-                  {charge.kind === "dues" ? `${formatPeriod(charge.period)} aidatı` : charge.description}
-                </span>
-                <br />
-                <span className="sub">
-                  Son ödeme {formatDate(charge.dueDate)}
-                  {charge.status === "partial" && ` · ${formatKurus(charge.paidKurus)} ödendi`}
-                </span>
-              </span>
-              <span className="right">
-                <Money kurus={charge.amountKurus} />
-                <br />
-                <Badge tone={chargeStatusTone[charge.status]}>{chargeStatusLabels[charge.status]}</Badge>
-              </span>
-              <button
-                type="button"
-                className="icon-btn"
-                aria-label="Borcu sil"
-                onClick={() =>
-                  confirmAndRun("Bu borç kaydı silinsin mi?", async () => {
-                    await chargeApi.delete(charge.id);
-                    reload();
-                  })
-                }
-              >
-                ✕
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <h2 className="section-title">Ödemeler</h2>
-      {statement.payments.length === 0 ? (
-        <EmptyState>Henüz ödeme yok.</EmptyState>
-      ) : (
-        <ul className="list">
-          {statement.payments.map((payment) => (
-            <li key={payment.id} className="list-item">
-              <span className="grow">
-                <span className="title">{formatDate(payment.paidAt)}</span>
-                <br />
-                <span className="sub">
-                  {paymentMethodLabels[payment.method]}
-                  {payment.note ? ` · ${payment.note}` : ""}
-                </span>
-              </span>
-              <Money kurus={payment.amountKurus} tone="good" />
-              <button
-                type="button"
-                className="icon-btn"
-                aria-label="Ödemeyi sil"
-                onClick={() =>
-                  confirmAndRun(`${formatKurus(payment.amountKurus)} tutarındaki ödeme silinsin mi?`, async () => {
-                    await paymentApi.delete(payment.id);
-                    reload();
-                  })
-                }
-              >
-                ✕
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <button
-        type="button"
-        className="btn danger block"
-        onClick={() =>
-          confirmAndRun(`Daire ${apartment.label} silinsin mi?`, async () => {
-            await apartmentApi.delete(apartmentId);
-            navigate("/daireler", { replace: true });
-          })
-        }
-      >
-        Daireyi sil
-      </button>
-      <p className="note">
-        Yalnızca sakin, borç ve ödeme kaydı olmayan daire silinebilir.
-      </p>
     </div>
   );
 }
