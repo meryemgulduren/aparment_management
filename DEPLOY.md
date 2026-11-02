@@ -9,13 +9,9 @@ Kurulum bir kez yapılır; sonra GitHub'a her gönderilen kod kendiliğinden yay
 
 ## 1. GitHub
 
-1. https://github.com adresinden hesap aç.
-2. Sağ üstte **+ → New repository**:
-   - Repository name: `acar-apartmani`
-   - **Private** seç (kod ve yapı herkese açık olmasın)
-   - "Add a README" gibi seçenekleri **işaretleme** (boş depo olmalı)
-3. Oluşan sayfadaki adresi (`https://github.com/KULLANICI/acar-apartmani.git`) Claude'a ilet;
-   kodu oraya Claude gönderecek. İlk gönderimde tarayıcıda GitHub girişi açılırsa onayla.
+Kod şu depoda: https://github.com/meryemgulduren/aparment_management (herkese açık).
+Git geçmişinde şifre yoktur; yeni bir sır eklememek için `.env` ve `.env.production`
+dosyaları git dışında tutulur.
 
 ## 2. Neon (veritabanı)
 
@@ -38,7 +34,8 @@ Kurulum bir kez yapılır; sonra GitHub'a her gönderilen kod kendiliğinden yay
 ## 3. Vercel (site)
 
 1. https://vercel.com → **Sign up** → **Continue with GitHub** → Hobby (ücretsiz) planı.
-2. **Add New → Project** → `acar-apartmani` deposunu seç → **Import**.
+2. **Add New → Project** → `aparment_management` deposunu seç → **Import**.
+   Project Name olarak `acar-apartmani` yaz (site adresi buna göre oluşur).
 3. Ayarlar ekranında:
    - **Root Directory:** `Edit` → `server` klasörünü seç (önemli)
    - Framework Preset: Express (otomatik algılanmazsa "Other")
